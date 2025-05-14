@@ -9,6 +9,7 @@ from functools import cached_property
 import numpy as np
 
 from py_benchmark_functions import config, core
+from py_benchmark_functions.info import FunctionMetadata
 
 
 class _NPMixin:
@@ -70,6 +71,10 @@ class NumpyFunction(core.Function, _NPMixin):
     @property
     def name(self) -> str:
         return self.__class__.__name__.replace("Numpy", "")
+
+    @property
+    def metadata(self) -> core.Metadata:
+        return FunctionMetadata[self.name]
 
 
 class NumpyTransformation(core.Transformation, _NPMixin):
