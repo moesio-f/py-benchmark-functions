@@ -14,6 +14,7 @@ from math import e, pi
 import tensorflow as tf
 
 from py_benchmark_functions import config, core
+from py_benchmark_functions.info import FunctionMetadata
 
 # Ensure tf.function's are run as graphs
 tf.config.run_functions_eagerly(False)
@@ -108,6 +109,10 @@ class TensorflowFunction(core.Function, _TFMixin):
     @property
     def name(self) -> str:
         return self.__class__.__name__.replace("Tensorflow", "")
+
+    @property
+    def metadata(self) -> core.Metadata:
+        return FunctionMetadata[self.name]
 
 
 class TensorflowTransformation(core.Transformation, _TFMixin):

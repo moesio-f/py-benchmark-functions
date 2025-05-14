@@ -2,7 +2,7 @@
 transformations on functions.
 """
 
-from .function import Domain, Function
+from .function import Domain, Function, Metadata
 
 
 class Transformation(Function):
@@ -59,6 +59,10 @@ class Transformation(Function):
     @property
     def name(self) -> str:
         return f"Transformed({self.base.name})"
+
+    @property
+    def metadata(self) -> Metadata:
+        return self.base.metadata
 
     @property
     def parent(self) -> Function:

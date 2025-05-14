@@ -3,6 +3,8 @@
 import abc
 import typing
 
+from .metadata import Metadata
+
 
 class Domain(typing.NamedTuple):
     min: list[float]
@@ -50,6 +52,17 @@ class Function:
     @property
     def domain(self) -> Domain:
         return self._domain
+
+    @property
+    @abc.abstractmethod
+    def metadata(self) -> Metadata:
+        """Return the function metadata associated
+        with its name.
+
+        Returns:
+            Metadata: function metadata.
+        """
+        pass
 
     @property
     @abc.abstractmethod
