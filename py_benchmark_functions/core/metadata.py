@@ -14,6 +14,7 @@ class Metadata:
         default_search_space (tuple[float, float]): search space bounds employed by
             the literature.
         references (list[str]): list of references with function definition.
+        comments (str): extra information/comments about this function.
         default_parameters (dict[str, float], None): default values any set of
             parameters required by the function.
         global_optimum (float, Callable[[int], float], None): known global optimum (if any). Some
@@ -25,6 +26,7 @@ class Metadata:
 
     default_search_space: tuple[float, float]
     references: list[str]
+    comments: str = ""
     default_parameters: dict[str, float] | None = None
     global_optimum: float | Callable[[int], float] | None = None
     global_optimum_coordinates: Callable[[int], list[float]] | None = None
