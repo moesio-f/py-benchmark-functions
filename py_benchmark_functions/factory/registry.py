@@ -23,7 +23,7 @@ class FunctionRegistry:
     def functions(self) -> list[str]:
         return list(sorted(self._reg))
 
-    def get(self, fn: str, backend: str | None = None):
+    def get(self, fn: str, backend: str | None = None) -> type[Function]:
         if backend is None:
             backend = "numpy"
 
@@ -42,7 +42,7 @@ class FunctionRegistry:
 
         return self._reg[fn][backend]
 
-    def __getitem__(self, key: str | tuple[str, str]):
+    def __getitem__(self, key: str | tuple[str, str]) -> type[Function]:
         fn, backend = key, None
         if isinstance(key, tuple):
             fn, backend = key

@@ -1,1 +1,1 @@
-from .core import Function, Transformation
+from .core import Domain, Function, Transformation
