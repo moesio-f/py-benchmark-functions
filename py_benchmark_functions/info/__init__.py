@@ -194,6 +194,7 @@ FunctionMetadata: dict[str, Metadata] = {
     ),
     "Schwefel": Metadata(
         default_search_space=(-100.0, 100.0),
+        default_parameters=dict(a=pi),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
@@ -267,6 +268,7 @@ FunctionMetadata: dict[str, Metadata] = {
     ),
     "Weierstrass": Metadata(
         default_search_space=(-0.5, 0.5),
+        default_parameters=dict(a=0.5, b=3.0, kmax=20),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],

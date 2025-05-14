@@ -101,6 +101,8 @@ class TensorflowFunction(core.Function, _TFMixin):
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
+        if domain is None and domain_min is None:
+            domain_min, domain_max = self.metadata.default_search_space
         super().__init__(dims, domain_min, domain_max, domain)
         self._use_tf = use_tf_function
         self._tf_function = tf.function(self._fn)
@@ -165,19 +167,28 @@ class AckleyTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-32.768,
-        domain_max=32.768,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
-        a=20,
-        b=0.2,
-        c=2 * pi,
+        a: float = None,
+        b: float = None,
+        c: float = None,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
-        self.a = a
-        self.b = b
-        self.c = c
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
+
+        params = self.metadata.default_parameters
+        self.a = params["a"] if a is None else a
+        self.b = params["b"] if a is None else b
+        self.c = params["c"] if a is None else c
 
     def _fn(self, x: tf.Tensor):
         d = tf.constant(x.shape[-1], self._dtype)
@@ -197,13 +208,20 @@ class Alpine2Tensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=0.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         return tf.reduce_prod(tf.multiply(tf.sqrt(x), tf.sin(x)), axis=-1)
@@ -217,13 +235,20 @@ class BentCigarTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=0.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         return tf.pow(x[0], 2) + tf.multiply(
@@ -237,14 +262,21 @@ class BohachevskyTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-100.0,
-        domain_max=100.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
         assert dims == 2, "Bohachevsky only supports 2 dimensions."
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         return (
@@ -262,13 +294,20 @@ class BrownTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-1.0,
-        domain_max=4.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -289,13 +328,20 @@ class ChungReynoldsTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-100.0,
-        domain_max=100.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         return tf.pow(tf.reduce_sum(tf.pow(x, 2), axis=-1), 2)
@@ -307,13 +353,20 @@ class CsendesTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-1.0,
-        domain_max=1.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         return tf.cond(
@@ -331,13 +384,20 @@ class Deb1Tensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-1.0,
-        domain_max=1.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -352,13 +412,20 @@ class Deb3Tensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=0.0,
-        domain_max=1.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -376,13 +443,20 @@ class DixonPriceTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-10.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         x = atleast_2d(x)
@@ -402,13 +476,20 @@ class ExponentialTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-1.0,
-        domain_max=1.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         return -tf.exp(tf.multiply(tf.reduce_sum(tf.pow(x, 2), axis=-1), -0.5))
@@ -420,13 +501,20 @@ class GriewankTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-100.0,
-        domain_max=100.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         x = atleast_2d(x)
@@ -445,13 +533,20 @@ class LevyTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-10.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         x = atleast_2d(x)
@@ -475,13 +570,20 @@ class Mishra2Tensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=0.0,
-        domain_max=1.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -497,13 +599,20 @@ class PowellSumTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-1.0,
-        domain_max=1.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -517,13 +626,20 @@ class QingTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-500.0,
-        domain_max=500.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -537,13 +653,20 @@ class RastriginTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-5.12,
-        domain_max=5.12,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -558,13 +681,20 @@ class RosenbrockTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-30.0,
-        domain_max=30.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         x = atleast_2d(x)
@@ -583,13 +713,20 @@ class RotatedHyperEllipsoidTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-65.536,
-        domain_max=65.536,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         x = atleast_2d(x)
@@ -607,13 +744,20 @@ class SalomonTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-100.0,
-        domain_max=100.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         x_sqrt = tf.sqrt(tf.reduce_sum(tf.pow(x, 2), axis=-1))
@@ -626,13 +770,20 @@ class SarganTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-100.0,
-        domain_max=100.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -654,13 +805,20 @@ class SumSquaresTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-10.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         mul = tf.range(1, x.shape[-1] + 1, dtype=self._dtype)
@@ -673,15 +831,24 @@ class SchwefelTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-100.0,
-        domain_max=100.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
-        a: float = pi,
+        a: float = None,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
-        self._a = a
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
+
+        params = self.metadata.default_parameters
+        self._a = params["a"] if a is None else a
 
     def _fn(self, x: tf.Tensor):
         a = tf.cast(self._a, dtype=self._dtype)
@@ -694,13 +861,20 @@ class Schwefel12Tensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-100.0,
-        domain_max=100.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -720,13 +894,20 @@ class Schwefel222Tensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-100.0,
-        domain_max=100.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         x_abs = tf.abs(x)
@@ -739,13 +920,20 @@ class Schwefel223Tensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-10.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         return tf.reduce_sum(tf.pow(x, 10), axis=-1)
@@ -757,13 +945,20 @@ class Schwefel226Tensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-500.0,
-        domain_max=500.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -778,13 +973,20 @@ class SchumerSteiglitzTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-10.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         return tf.reduce_sum(tf.pow(x, 4), axis=-1)
@@ -796,13 +998,20 @@ class SphereTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=0.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         return tf.reduce_sum(tf.math.pow(x, 2), axis=-1)
@@ -814,13 +1023,20 @@ class StrechedVSineWaveTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-10.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -843,13 +1059,20 @@ class Trigonometric2Tensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-500.0,
-        domain_max=500.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         xi_squared = tf.pow(tf.subtract(x, 0.9), 2)
@@ -868,19 +1091,28 @@ class WeierstrassTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-0.5,
-        domain_max=0.5,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
-        a: float = 0.5,
-        b: float = 3,
-        kmax: int = 20,
+        a: float = None,
+        b: float = None,
+        kmax: int = None,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
-        self._a = a
-        self._b = b
-        self._kmax = kmax
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
+
+        params = self.metadata.default_parameters
+        self._a = params["a"] if a is None else a
+        self._b = params["b"] if a is None else b
+        self._kmax = params["kmax"] if a is None else kmax
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -910,13 +1142,20 @@ class WhitleyTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-10.24,
-        domain_max=10.24,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -941,13 +1180,22 @@ class WWavyTensorflow(TensorflowFunction):
         dims: int,
         domain_min=-pi,
         domain_max=pi,
-        k: float = 10.0,
+        k: float = None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
-        self._k = k
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
+
+        params = self.metadata.default_parameters
+        self._k = params["k"] if k is None else k
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
@@ -968,13 +1216,20 @@ class ZakharovTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-5.0,
-        domain_max=10.0,
+        domain_min=None,
+        domain_max=None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        super().__init__(dims, domain_min, domain_max, domain, use_tf_function, dtype)
+        super().__init__(
+            dims,
+            domain_min=domain_min,
+            domain_max=domain_max,
+            domain=domain,
+            use_tf_function=use_tf_function,
+            dtype=dtype,
+        )
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]

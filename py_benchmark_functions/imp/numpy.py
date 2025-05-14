@@ -68,6 +68,17 @@ class _NPMixin:
 
 
 class NumpyFunction(core.Function, _NPMixin):
+    def __init__(
+        self,
+        dims: int,
+        domain_min=None,
+        domain_max=None,
+        domain=None,
+    ):
+        if domain is None and domain_min is None:
+            domain_min, domain_max = self.metadata.default_search_space
+        super().__init__(dims, domain_min, domain_max, domain)
+
     @property
     def name(self) -> str:
         return self.__class__.__name__.replace("Numpy", "")
@@ -122,14 +133,17 @@ class AckleyNumpy(NumpyFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=-32.768,
-        domain_max=32.768,
+        domain_min=None,
+        domain_max=None,
+        domain=None,
         a=20,
         b=0.2,
         c=2 * np.pi,
         dtype=np.float32,
     ):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
         self.a = a
         self.b = b
         self.c = c
@@ -149,8 +163,16 @@ class AckleyNumpy(NumpyFunction):
 class GriewankNumpy(NumpyFunction):
     """Griewank function defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-600.0, domain_max=600.0):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+    def __init__(
+        self,
+        dims: int,
+        domain_min=None,
+        domain_max=None,
+        domain=None,
+    ):
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         x = np.atleast_2d(x)
@@ -168,8 +190,10 @@ class GriewankNumpy(NumpyFunction):
 class RastriginNumpy(NumpyFunction):
     """Rastrigin function defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-5.12, domain_max=5.12):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+    def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         d = x.shape[-1]
@@ -181,8 +205,10 @@ class RastriginNumpy(NumpyFunction):
 class LevyNumpy(NumpyFunction):
     """Levy function defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-10.0, domain_max=10.0):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+    def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         x = np.atleast_2d(x)
@@ -203,8 +229,10 @@ class LevyNumpy(NumpyFunction):
 class RosenbrockNumpy(NumpyFunction):
     """Rosenbrock function defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-5.0, domain_max=10.0):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+    def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         x = np.atleast_2d(x)
@@ -218,8 +246,10 @@ class RosenbrockNumpy(NumpyFunction):
 class ZakharovNumpy(NumpyFunction):
     """Zakharov function defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-5.0, domain_max=10.0):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+    def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         d = x.shape[-1]
@@ -233,9 +263,11 @@ class ZakharovNumpy(NumpyFunction):
 class BohachevskyNumpy(NumpyFunction):
     """Bohachevsky function (f1, 2-D) defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-100.0, domain_max=100.0):
+    def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
         assert dims == 2, "Bohachevsky only supports 2d."
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         result = (
@@ -252,8 +284,10 @@ class BohachevskyNumpy(NumpyFunction):
 class SumSquaresNumpy(NumpyFunction):
     """SumSquares function defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-10.0, domain_max=10.0):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+    def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         d = x.shape[-1]
@@ -266,8 +300,10 @@ class SumSquaresNumpy(NumpyFunction):
 class SphereNumpy(NumpyFunction):
     """Sphere function defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-5.12, domain_max=5.12):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+    def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         result = np.sum(x * x, axis=-1)
@@ -278,8 +314,10 @@ class SphereNumpy(NumpyFunction):
 class RotatedHyperEllipsoidNumpy(NumpyFunction):
     """Rotated Hyper-Ellipsoid function defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-65.536, domain_max=65.536):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+    def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         x = np.atleast_2d(x)
@@ -294,8 +332,10 @@ class RotatedHyperEllipsoidNumpy(NumpyFunction):
 class DixonPriceNumpy(NumpyFunction):
     """Dixon-Price function defined in [1]."""
 
-    def __init__(self, dims: int, domain_min=-10.0, domain_max=10.0):
-        super().__init__(dims, domain_min=domain_min, domain_max=domain_max)
+    def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
+        super().__init__(
+            dims, domain_min=domain_min, domain_max=domain_max, domain=domain
+        )
 
     def _fn(self, x: np.ndarray):
         x = np.atleast_2d(x)
