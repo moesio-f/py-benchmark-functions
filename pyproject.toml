@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py_benchmark_functions"
+version = "0.0.0"
+readme = "README.md"
+description = " Python benchmark functions for Optimization with NumPy, TensorFlow and PyTorch support."
+requires-python = ">=3.8"
+
+dependencies = ["numpy>=2.0.0"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+tensorflow = ["tensorflow>=2.0.0"]
+torch = ["torch>=2.0.0"]
+
+[project.urls]
+repository = "https://github.com/moesio-f/py-benchmark-functions"
+
+[tool.setuptools]
+packages = ["py_benchmark_functions"]
