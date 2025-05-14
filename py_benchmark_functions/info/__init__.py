@@ -1,7 +1,7 @@
 """Static metadata mapper."""
 
 import functools
-from math import pi
+from math import pi, sqrt
 
 from py_benchmark_functions import Metadata
 
@@ -34,40 +34,41 @@ FunctionMetadata: dict[str, Metadata] = {
         references=[
             "https://www3.ntu.edu.sg/home/epnsugan/index_files/CEC2021/CEC2021-2.htm",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Bohachevsky": Metadata(
         default_search_space=(-100.0, 100.0),
+        comments="2D only.",
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=lambda d: [0.0, 0.0],
     ),
     "Brown": Metadata(
         default_search_space=(-1.0, 4.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "ChungReynolds": Metadata(
         default_search_space=(-100.0, 100.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Csendes": Metadata(
         default_search_space=(-1.0, 1.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Deb1": Metadata(
         default_search_space=(-1.0, 1.0),
@@ -90,7 +91,7 @@ FunctionMetadata: dict[str, Metadata] = {
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
+        global_optimum=0.0,
         global_optimum_coordinates=None,
     ),
     "Exponential": Metadata(
@@ -98,184 +99,187 @@ FunctionMetadata: dict[str, Metadata] = {
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=1.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Griewank": Metadata(
         default_search_space=(-100.0, 100.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Levy": Metadata(
         default_search_space=(-10.0, 10.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
     ),
     "Mishra2": Metadata(
         default_search_space=(0.0, 1.0),
+        comments="Coordinates found manually trough optimization.",
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=2.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
     ),
     "PowellSum": Metadata(
         default_search_space=(-1.0, 1.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
     ),
     "Qing": Metadata(
         default_search_space=(-500.0, 500.0),
+        comments="Global minima also occurs at -sqrt(i).",
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=lambda d: [sqrt(i + 1) for i in range(0, d)],
     ),
     "Rastrigin": Metadata(
         default_search_space=(-5.12, 5.12),
         references=[
             "https://www3.ntu.edu.sg/home/epnsugan/index_files/CEC2021/CEC2021-2.htm",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Rosenbrock": Metadata(
         default_search_space=(-30.0, 30.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
     ),
     "RotatedHyperEllipsoid": Metadata(
         default_search_space=(-30.0, 30.0),
         references=[
             "https://www.sfu.ca/~ssurjano/optimization.html",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Salomon": Metadata(
         default_search_space=(-100.0, 100.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Sargan": Metadata(
         default_search_space=(-100.0, 100.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "SumSquares": Metadata(
         default_search_space=(-10.0, 10.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Schwefel": Metadata(
         default_search_space=(-100.0, 100.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Schwefel12": Metadata(
         default_search_space=(-100.0, 100.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Schwefel222": Metadata(
         default_search_space=(-100.0, 100.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Schwefel223": Metadata(
         default_search_space=(-10.0, 10.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Schwefel226": Metadata(
         default_search_space=(-500.0, 500.0),
+        comments="Reference wrongly suggests global optimum equals to -418.983.",
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "SchumerSteiglitz": Metadata(
         default_search_space=(-10.0, 10.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Sphere": Metadata(
         default_search_space=(0.0, 10.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "StrechedVSineWave": Metadata(
         default_search_space=(-10.0, 10.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Trigonometric2": Metadata(
         default_search_space=(-500.0, 500.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Weierstrass": Metadata(
         default_search_space=(-0.5, 0.5),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Whitley": Metadata(
         default_search_space=(-10.24, 10.24),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
     ),
     "WWavy": Metadata(
         default_search_space=(-pi, pi),
@@ -283,15 +287,15 @@ FunctionMetadata: dict[str, Metadata] = {
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Zakharov": Metadata(
         default_search_space=(-5.0, 10.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=0.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
 }
