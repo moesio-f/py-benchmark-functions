@@ -40,7 +40,7 @@ class Metadata:
 
         return self.global_optimum
 
-    def concrete_otimum_coordinates(self, dims: int) -> list[float]:
+    def concrete_optimum_coordinates(self, dims: int) -> list[float]:
         if self.global_optimum_coordinates is None:
             return
 

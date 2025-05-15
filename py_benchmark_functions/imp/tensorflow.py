@@ -58,10 +58,10 @@ class _TFMixin:
 
         Returns:
             tf.Tensor: evaluation for x, either a tensor of
-                shape (1,) or (batch,)
+                shape () or (batch,)
         """
         #  Guarantee dtype
-        x = tf.cast(x, dytpe=self._dtype)
+        x = tf.cast(x, dtype=self._dtype)
 
         # Select whether should be run eagerly or not
         fn = self._tf_function if self._use_tf else self._fn
@@ -91,7 +91,7 @@ class _TFMixin:
         return tf.cast(fn(x), dtype=self._dtype)
 
 
-class TensorflowFunction(core.Function, _TFMixin):
+class TensorflowFunction(_TFMixin, core.Function):
     def __init__(
         self,
         dims: int,
@@ -117,7 +117,7 @@ class TensorflowFunction(core.Function, _TFMixin):
         return FunctionMetadata[self.name]
 
 
-class TensorflowTransformation(core.Transformation, _TFMixin):
+class TensorflowTransformation(_TFMixin, core.Transformation):
     def __init__(
         self,
         fn: core.Function,
@@ -141,7 +141,7 @@ class TensorflowTransformation(core.Transformation, _TFMixin):
     @cached_property
     def _params_as_tensor(self) -> tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
         return tuple(
-            tf.constant(p)
+            tf.constant(p, dtype=self._dtype)
             for p in [self.vshift, self.hshift, self.outer_scale, self.inner_scale]
         )
 
@@ -203,116 +203,48 @@ class AckleyTensorflow(TensorflowFunction):
 
 
 class Alpine2Tensorflow(TensorflowFunction):
-    """Alpine function 2 defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         return tf.reduce_prod(tf.multiply(tf.sqrt(x), tf.sin(x)), axis=-1)
 
 
 class BentCigarTensorflow(TensorflowFunction):
-    """BentCigar function defined in [2].
-    Implementation doesn't support batch yet.
-    """
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
-        return tf.pow(x[0], 2) + tf.multiply(
-            tf.reduce_sum(tf.pow(x[1:], 2), axis=-1), 1e6
-        )
+        d = x.shape[-1]
+        indices = tf.range(start=1, limit=d, dtype=tf.int32)
+        x0 = tf.squeeze(tf.gather(x, [0], axis=-1))
+        xi = tf.gather(x, indices, axis=-1)
+        return tf.pow(x0, 2) + tf.multiply(tf.reduce_sum(tf.pow(xi, 2), axis=-1), 1e6)
 
 
 class BohachevskyTensorflow(TensorflowFunction):
-    """Bohachevsky function 1 defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        assert dims == 2, "Bohachevsky only supports 2 dimensions."
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
-        return (
-            tf.pow(x[0], 2)
-            + tf.math.multiply(tf.pow(x[1], 2), 2)
-            - tf.math.multiply(tf.cos(3 * pi * x[0]), 0.3)
-            - tf.math.multiply(tf.cos(4 * pi * x[1]), 0.4)
+        x0 = tf.squeeze(tf.gather(x, [0], axis=-1))
+        x1 = tf.squeeze(tf.gather(x, [1], axis=-1))
+        out = (
+            tf.pow(x0, 2)
+            + tf.math.multiply(tf.pow(x1, 2), 2)
+            - tf.math.multiply(tf.cos(3 * pi * x0), 0.3)
+            - tf.math.multiply(tf.cos(4 * pi * x1), 0.4)
             + 0.7
         )
 
-
-class BrownTensorflow(TensorflowFunction):
-    """Brown function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
+        # Maybe batch with size 1?
+        shape = tf.shape(x)
+        out = tf.cond(
+            tf.math.logical_and(tf.size(shape) > 1, shape[0] == 1),
+            true_fn=lambda: tf.expand_dims(out, axis=0),
+            false_fn=lambda: out,
         )
 
+        return out
+
+
+class BrownTensorflow(TensorflowFunction):
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
-        xi = x[: d - 1]  # len = d-1
-        xi1 = x[1:d]  # len = d-1
+        indices = tf.range(start=0, limit=d, dtype=tf.int32)
+        xi = tf.gather(x, indices[:-1], axis=-1)
+        xi1 = tf.gather(x, indices[1:], axis=-1)
 
         xi_sq = tf.pow(xi, 2)
         xi1_sq = tf.pow(xi1, 2)
@@ -323,51 +255,11 @@ class BrownTensorflow(TensorflowFunction):
 
 
 class ChungReynoldsTensorflow(TensorflowFunction):
-    """Chung Reynolds function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         return tf.pow(tf.reduce_sum(tf.pow(x, 2), axis=-1), 2)
 
 
 class CsendesTensorflow(TensorflowFunction):
-    """Csendes function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         return tf.cond(
             tf.equal(tf.reduce_prod(x), 0),
@@ -379,26 +271,6 @@ class CsendesTensorflow(TensorflowFunction):
 
 
 class Deb1Tensorflow(TensorflowFunction):
-    """Deb function 1 defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
         return -tf.divide(
@@ -407,26 +279,6 @@ class Deb1Tensorflow(TensorflowFunction):
 
 
 class Deb3Tensorflow(TensorflowFunction):
-    """Deb function 3 defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
         return -tf.divide(
@@ -438,27 +290,8 @@ class Deb3Tensorflow(TensorflowFunction):
 
 
 class DixonPriceTensorflow(TensorflowFunction):
-    """Dixon-Price function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
+        shape = tf.shape(x)
         x = atleast_2d(x)
         d = tf.shape(x)[-1]
         x0 = x[:, 0]
@@ -467,56 +300,18 @@ class DixonPriceTensorflow(TensorflowFunction):
         xold = x[:, :-1]
         dixon_sum = ii * tf.pow(2 * tf.pow(xi, 2) - xold, 2)
         result = tf.pow(x0 - 1, 2) + tf.reduce_sum(dixon_sum, -1)
-        return tf.squeeze(result)
+        result = maybe_batch(tf.squeeze(result), shape)
+        return result
 
 
 class ExponentialTensorflow(TensorflowFunction):
-    """Exponential function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         return -tf.exp(tf.multiply(tf.reduce_sum(tf.pow(x, 2), axis=-1), -0.5))
 
 
 class GriewankTensorflow(TensorflowFunction):
-    """Griewank function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
+        initial_shape = tf.shape(x)
         x = atleast_2d(x)
         shape = tf.shape(x)
         griewank_sum = tf.divide(tf.reduce_sum(tf.math.pow(x, 2), axis=-1), 4000)
@@ -524,31 +319,13 @@ class GriewankTensorflow(TensorflowFunction):
         den = tf.repeat(tf.expand_dims(den, 0), shape[0], axis=0)
         prod = tf.cos(tf.math.divide(x, tf.sqrt(den)))
         prod = tf.reduce_prod(prod, axis=-1)
-        return tf.squeeze(griewank_sum - prod + 1)
+        result = maybe_batch(tf.squeeze(griewank_sum - prod + 1), initial_shape)
+        return result
 
 
 class LevyTensorflow(TensorflowFunction):
-    """Levy function defined in [4]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
+        shape = tf.shape(x)
         x = atleast_2d(x)
         d = tf.shape(x)[-1] - 1
         w = 1 + tf.math.divide(tf.math.subtract(x, 1), 4)
@@ -561,86 +338,28 @@ class LevyTensorflow(TensorflowFunction):
             tf.math.pow((wi - 1), 2) * (1 + 10 * tf.math.pow(tf.sin(pi * wi + 1), 2)),
             axis=-1,
         )
-        return tf.squeeze(term1 + levy_sum + term3)
+        result = maybe_batch(tf.squeeze(term1 + levy_sum + term3), shape)
+        return result
 
 
 class Mishra2Tensorflow(TensorflowFunction):
-    """Mishra function 2 defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
-        xi = x[: d - 1]
-        xi1 = x[1:]
+        indices = tf.range(start=0, limit=d, dtype=tf.int32)
+        xi = tf.gather(x, indices[:-1], axis=-1)
+        xi1 = tf.gather(x, indices[1:], axis=-1)
         xn = d - tf.reduce_sum(tf.multiply(xi + xi1, 0.5), axis=-1)
         return tf.pow(1 + xn, xn)
 
 
 class PowellSumTensorflow(TensorflowFunction):
-    """Powell Sum function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
         indices = tf.range(start=1, limit=d + 1, dtype=self._dtype)
-        return tf.reduce_sum(tf.pow(tf.math.abs(x), indices + 1))
+        return tf.reduce_sum(tf.pow(tf.math.abs(x), indices + 1), axis=-1)
 
 
 class QingTensorflow(TensorflowFunction):
-    """Qing function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
         indices = tf.range(start=1, limit=d + 1, dtype=self._dtype)
@@ -648,26 +367,6 @@ class QingTensorflow(TensorflowFunction):
 
 
 class RastriginTensorflow(TensorflowFunction):
-    """Rastrigin function defined in [2]. Search range may vary."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
         return (10 * d) + tf.reduce_sum(
@@ -676,27 +375,8 @@ class RastriginTensorflow(TensorflowFunction):
 
 
 class RosenbrockTensorflow(TensorflowFunction):
-    """Rosenbrock function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
+        shape = tf.shape(x)
         x = atleast_2d(x)
         xi = x[:, :-1]
         xnext = x[:, 1:]
@@ -704,130 +384,62 @@ class RosenbrockTensorflow(TensorflowFunction):
             100 * tf.math.pow(xnext - tf.math.pow(xi, 2), 2) + tf.math.pow(xi - 1, 2),
             axis=-1,
         )
-        return tf.squeeze(result)
+        result = maybe_batch(tf.squeeze(result), shape)
+        return result
 
 
 class RotatedHyperEllipsoidTensorflow(TensorflowFunction):
-    """Rotated Hyper-Ellipsoid function defined in [4]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
+        shape = tf.shape(x)
         x = atleast_2d(x)
         d = tf.shape(x)[-1]
         mat = tf.repeat(tf.expand_dims(x, 1), d, 1)
         matlow = tf.linalg.band_part(mat, -1, 0)
         inner = tf.reduce_sum(matlow**2, -1)
         result = tf.reduce_sum(inner, -1)
-        return tf.squeeze(result)
+        result = maybe_batch(tf.squeeze(result), shape)
+        return result
 
 
 class SalomonTensorflow(TensorflowFunction):
-    """Salomon function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         x_sqrt = tf.sqrt(tf.reduce_sum(tf.pow(x, 2), axis=-1))
         return 1 - tf.cos(tf.multiply(x_sqrt, 2 * pi)) + tf.multiply(x_sqrt, 0.1)
 
 
 class SarganTensorflow(TensorflowFunction):
-    """Sargan function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
-        d = x.shape[-1]
-        xj = x[1:]
-
-        def fn(acc, xi):
-            return acc + tf.multiply(
-                tf.pow(xi, 2)
-                + tf.multiply(tf.reduce_sum(tf.multiply(xj, xi), axis=-1), 0.4),
-                d,
-            )
-
-        return tf.foldl(fn, x, initializer=tf.cast(0, dtype=self._dtype))
+        shape = tf.shape(x)
+        d = shape[-1]
+        inner_sum_axis = tf.size(shape) - 1
+        indices = tf.range(start=1, limit=d, dtype=tf.int32)
+        has_batch = tf.math.logical_and(inner_sum_axis > 0, shape[0] > 1)
+        xj = tf.expand_dims(tf.gather(x, indices, axis=-1), axis=-1)
+        inner_x = tf.cond(
+            has_batch, true_fn=lambda: tf.expand_dims(x, axis=1), false_fn=lambda: x
+        )
+        return tf.reduce_sum(
+            tf.multiply(
+                tf.cast(d, self._dtype),
+                tf.pow(x, 2.0)
+                + tf.multiply(tf.reduce_sum(inner_x * xj, axis=inner_sum_axis), 0.4),
+            ),
+            axis=-1,
+        )
 
 
 class SumSquaresTensorflow(TensorflowFunction):
-    """Sum Squares function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         mul = tf.range(1, x.shape[-1] + 1, dtype=self._dtype)
         return tf.reduce_sum(tf.math.multiply(tf.math.pow(x, 2), mul), axis=-1)
 
 
-class SchwefelTensorflow(TensorflowFunction):
-    """Schwefel function defined in [1]."""
+class SchumerSteiglitzTensorflow(TensorflowFunction):
+    def _fn(self, x: tf.Tensor):
+        return tf.reduce_sum(tf.pow(x, 4), axis=-1)
 
+
+class SchwefelTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
@@ -856,110 +468,22 @@ class SchwefelTensorflow(TensorflowFunction):
 
 
 class Schwefel12Tensorflow(TensorflowFunction):
-    """Schwefel function 1.2 defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
-        d = x.shape[-1]
-        indices = tf.range(start=0, limit=d, dtype=tf.int32)
-
-        def fn(acc, i):
-            gather_indices = tf.range(start=0, limit=i + 1, dtype=tf.int32)
-            x_ = tf.gather(x, gather_indices)
-            return acc + tf.pow(tf.reduce_sum(x_, axis=-1), 2)
-
-        return tf.foldl(fn, indices, initializer=tf.cast(0, dtype=self._dtype))
+        return tf.reduce_sum(tf.pow(tf.math.cumsum(x, axis=-1), 2), axis=-1)
 
 
 class Schwefel222Tensorflow(TensorflowFunction):
-    """Schwefel function 2.22 defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         x_abs = tf.abs(x)
         return tf.reduce_sum(x_abs, axis=-1) + tf.reduce_prod(x_abs, axis=-1)
 
 
 class Schwefel223Tensorflow(TensorflowFunction):
-    """Schwefel function 2.23 defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         return tf.reduce_sum(tf.pow(x, 10), axis=-1)
 
 
 class Schwefel226Tensorflow(TensorflowFunction):
-    """Schwefel function 2.26 defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
         return -tf.divide(
@@ -967,83 +491,18 @@ class Schwefel226Tensorflow(TensorflowFunction):
         )
 
 
-class SchumerSteiglitzTensorflow(TensorflowFunction):
-    """Schumer Steiglitz function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
-    def _fn(self, x: tf.Tensor):
-        return tf.reduce_sum(tf.pow(x, 4), axis=-1)
-
-
 class SphereTensorflow(TensorflowFunction):
-    """Sphere function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         return tf.reduce_sum(tf.math.pow(x, 2), axis=-1)
 
 
 class StrechedVSineWaveTensorflow(TensorflowFunction):
-    """Streched V Sine Wave function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
-        xi_sqrd = tf.pow(x[: d - 1], 2)
-        xi1_sqrd = tf.pow(x[1:], 2)
-        sqrd_sum = xi_sqrd + xi1_sqrd
-
+        indices = tf.range(start=0, limit=d, dtype=tf.int32)
+        xi_sqrd = tf.pow(tf.gather(x, indices[:-1], axis=-1), 2)
+        xi1_sqrd = tf.pow(tf.gather(x, indices[1:], axis=-1), 2)
+        sqrd_sum = xi1_sqrd + xi_sqrd
         return tf.reduce_sum(
             tf.multiply(
                 tf.pow(sqrd_sum, 0.25),
@@ -1054,13 +513,24 @@ class StrechedVSineWaveTensorflow(TensorflowFunction):
 
 
 class Trigonometric2Tensorflow(TensorflowFunction):
-    """Trigonometric function 2 defined in [1]."""
+    def _fn(self, x: tf.Tensor):
+        xi_squared = tf.pow(tf.subtract(x, 0.9), 2)
+        x1_squared = tf.gather(xi_squared, [0], axis=-1)
+        res_x = (
+            tf.multiply(tf.pow(tf.sin(tf.multiply(xi_squared, 7)), 2), 8)
+            + tf.multiply(tf.pow(tf.sin(tf.multiply(x1_squared, 14)), 2), 6)
+            + xi_squared
+        )
+        return 1 + tf.reduce_sum(res_x, axis=-1)
 
+
+class WWavyTensorflow(TensorflowFunction):
     def __init__(
         self,
         dims: int,
-        domain_min=None,
-        domain_max=None,
+        domain_min=-pi,
+        domain_max=pi,
+        k: float = None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
@@ -1073,21 +543,23 @@ class Trigonometric2Tensorflow(TensorflowFunction):
             use_tf_function=use_tf_function,
             dtype=dtype,
         )
+        params = self.metadata.default_parameters
+        self._k = params["k"] if k is None else k
 
     def _fn(self, x: tf.Tensor):
-        xi_squared = tf.pow(tf.subtract(x, 0.9), 2)
-
-        res_x = (
-            tf.multiply(tf.pow(tf.sin(tf.multiply(xi_squared, 7)), 2), 8)
-            + tf.multiply(tf.pow(tf.sin(tf.multiply(xi_squared, 14)), 2), 6)
-            + xi_squared
+        d = x.shape[-1]
+        return 1 - tf.divide(
+            tf.reduce_sum(
+                tf.multiply(
+                    tf.cos(tf.multiply(x, self._k)), tf.exp(tf.divide(-tf.pow(x, 2), 2))
+                ),
+                axis=-1,
+            ),
+            d,
         )
-        return 1 + tf.reduce_sum(res_x, axis=-1)
 
 
 class WeierstrassTensorflow(TensorflowFunction):
-    """Weierstrass function defined in [1]."""
-
     def __init__(
         self,
         dims: int,
@@ -1108,7 +580,6 @@ class WeierstrassTensorflow(TensorflowFunction):
             use_tf_function=use_tf_function,
             dtype=dtype,
         )
-
         params = self.metadata.default_parameters
         self._a = params["a"] if a is None else a
         self._b = params["b"] if a is None else b
@@ -1116,121 +587,71 @@ class WeierstrassTensorflow(TensorflowFunction):
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
-        a = tf.cast(self._a, dtype=self._dtype)
-        b = tf.cast(self._b, dtype=self._dtype)
-
         kindices = tf.range(start=0, limit=self._kmax + 1, dtype=self._dtype)
-        ak = tf.pow(a, kindices)
-        bk = tf.pow(b, kindices)
 
-        ak_bk_sum = d * tf.reduce_sum(
+        #  Constants
+        ak = tf.pow(self._a, kindices)
+        bk = tf.pow(self._b, kindices)
+        ak_cos_pi_bk = d * tf.reduce_sum(
             tf.multiply(ak, tf.cos(tf.multiply(bk, pi))), axis=-1
         )
 
-        def fn(acc, xi):
-            s = tf.reduce_sum(
-                tf.multiply(ak, tf.cos(tf.multiply(2 * pi * bk, xi + 0.5))), axis=-1
-            )
-            return acc + (s - ak_bk_sum)
-
-        return tf.foldl(fn, x, initializer=tf.cast(0, dtype=self._dtype))
+        # Inner x
+        inner_x = tf.expand_dims(tf.add(x, 0.5), axis=-1)
+        ak_cos_2pibk = tf.reduce_sum(ak * tf.cos(2 * pi * bk * inner_x), axis=-1)
+        return tf.reduce_sum(ak_cos_2pibk, axis=-1) - ak_cos_pi_bk
 
 
 class WhitleyTensorflow(TensorflowFunction):
-    """Whitley function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
-        d = x.shape[-1]
+        shape = tf.shape(x)
+        d = shape[-1]
+        has_batch = tf.size(shape) > 1
+        initializer = tf.cond(
+            has_batch,
+            true_fn=lambda: tf.zeros((shape[0],), dtype=self._dtype),
+            false_fn=lambda: tf.cast(0.0, dtype=self._dtype),
+        )
         indices = tf.range(start=0, limit=d, dtype=tf.int32)
 
-        def fn(acc, i):
-            xi_sqrd = tf.pow(tf.gather(x, i), 2)
-            ij_diff_sqrd = tf.pow(tf.subtract(xi_sqrd, x), 2)
-            aux = tf.pow(-tf.subtract(x, 1), 2)
-            t1 = tf.divide(tf.pow(tf.multiply(ij_diff_sqrd, 100) + aux, 2), 4000)
-            t2 = tf.cos(tf.multiply(ij_diff_sqrd, 100) + aux)
+        def fn(acc, j):
+            # xi, xj
+            xi = x
+            xj = tf.gather(x, j, axis=-1)
+            xj = tf.cond(
+                has_batch,
+                true_fn=lambda: tf.expand_dims(xj, axis=-1),
+                false_fn=lambda: xj,
+            )
+
+            # Terms
+            xi_sqrd = tf.pow(xi, 2)
+            xi_sqrd_minus_xj_all_sqrd = tf.pow(tf.subtract(xi_sqrd, xj), 2)
+            one_minus_xj_all_sqrd = tf.pow(-tf.subtract(xj, 1), 2)
+            hundred_composite = tf.multiply(xi_sqrd_minus_xj_all_sqrd, 100)
+
+            # Terms
+            t1 = tf.divide(
+                tf.pow(
+                    tf.add(
+                        hundred_composite,
+                        one_minus_xj_all_sqrd,
+                    ),
+                    2,
+                ),
+                4000,
+            )
+            t2 = tf.cos(
+                tf.add(hundred_composite, one_minus_xj_all_sqrd),
+            )
+
+            # Accumulated value
             return acc + tf.reduce_sum(t1 - t2 + 1, axis=-1)
 
-        return tf.foldl(fn, indices, initializer=tf.cast(0, dtype=self._dtype))
-
-
-class WWavyTensorflow(TensorflowFunction):
-    """W / Wavy function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=-pi,
-        domain_max=pi,
-        k: float = None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
-        params = self.metadata.default_parameters
-        self._k = params["k"] if k is None else k
-
-    def _fn(self, x: tf.Tensor):
-        d = x.shape[-1]
-        return 1 - tf.divide(
-            tf.reduce_sum(
-                tf.multiply(
-                    tf.cos(tf.multiply(x, self._k)), tf.exp(tf.divide(-tf.pow(x, 2), 2))
-                ),
-                axis=-1,
-            ),
-            d,
-        )
+        return tf.foldl(fn, indices, initializer=initializer)
 
 
 class ZakharovTensorflow(TensorflowFunction):
-    """Zakharov function defined in [1]."""
-
-    def __init__(
-        self,
-        dims: int,
-        domain_min=None,
-        domain_max=None,
-        domain: core.Domain = None,
-        use_tf_function: bool = True,
-        dtype=tf.float32,
-    ):
-        super().__init__(
-            dims,
-            domain_min=domain_min,
-            domain_max=domain_max,
-            domain=domain,
-            use_tf_function=use_tf_function,
-            dtype=dtype,
-        )
-
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
         sum1 = tf.reduce_sum(tf.math.pow(x, 2), axis=-1)
@@ -1249,4 +670,12 @@ def atleast_2d(tensor: tf.Tensor) -> tf.Tensor:
         tf.less(tf.size(tf.shape(tensor)), 2),
         lambda: tf.expand_dims(tensor, 0),
         lambda: tensor,
+    )
+
+
+def maybe_batch(value: tf.Tensor, shape) -> tf.Tensor:
+    return tf.cond(
+        tf.math.logical_and(tf.size(shape) > 1, shape[0] == 1),
+        true_fn=lambda: tf.expand_dims(value, axis=0),
+        false_fn=lambda: value,
     )

@@ -2,12 +2,17 @@
 
 import functools
 from math import pi, sqrt
+from typing import Callable
 
 from py_benchmark_functions import Metadata
 
 
 def repeat_coordinates(n: int, value: float) -> list[float]:
     return [value] * n
+
+
+def coordinates_by_index_rule(n: int, rule: Callable[[int], float]) -> list[float]:
+    return [rule(i) for i in range(n)]
 
 
 FunctionMetadata: dict[str, Metadata] = {
@@ -39,12 +44,12 @@ FunctionMetadata: dict[str, Metadata] = {
     ),
     "Bohachevsky": Metadata(
         default_search_space=(-100.0, 100.0),
-        comments="2D only.",
+        comments="Only first two coordinates have meaning.",
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
         global_optimum=0.0,
-        global_optimum_coordinates=lambda d: [0.0, 0.0],
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Brown": Metadata(
         default_search_space=(-1.0, 4.0),
@@ -72,34 +77,41 @@ FunctionMetadata: dict[str, Metadata] = {
     ),
     "Deb1": Metadata(
         default_search_space=(-1.0, 1.0),
+        comments="Has multiple global optimum coordinates.",
         references=[
             "https://arxiv.org/abs/1308.4008",
+            "https://al-roomi.org/benchmarks/unconstrained/n-dimensions/231-deb-s-function-no-01",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=-1.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=pi / 2),
     ),
     "Deb3": Metadata(
         default_search_space=(0.0, 1.0),
+        comments="Has multiple global optimum coordinates.",
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=None,
-        global_optimum_coordinates=None,
+        global_optimum=-1.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=pi / 2),
     ),
     "DixonPrice": Metadata(
         default_search_space=(-10.0, 10.0),
         references=[
             "https://arxiv.org/abs/1308.4008",
+            "https://www.sfu.ca/~ssurjano/dixonpr.html",
         ],
         global_optimum=0.0,
-        global_optimum_coordinates=None,
+        global_optimum_coordinates=functools.partial(
+            coordinates_by_index_rule, rule=lambda i: 2 ** -((2**i - 2) / (2**i))
+        ),
     ),
     "Exponential": Metadata(
         default_search_space=(-1.0, 1.0),
+        comments="The reference shows the wrong global optimum value (1.0 instead of -1.0).",
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=1.0,
+        global_optimum=-1.0,
         global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Griewank": Metadata(
@@ -120,9 +132,10 @@ FunctionMetadata: dict[str, Metadata] = {
     ),
     "Mishra2": Metadata(
         default_search_space=(0.0, 1.0),
-        comments="Coordinates found manually trough optimization.",
+        comments="Used definition by [2].",
         references=[
             "https://arxiv.org/abs/1308.4008",
+            "https://infinity77.net/global_optimization/test_functions_nd_M.html",
         ],
         global_optimum=2.0,
         global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
@@ -133,7 +146,7 @@ FunctionMetadata: dict[str, Metadata] = {
             "https://arxiv.org/abs/1308.4008",
         ],
         global_optimum=0.0,
-        global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Qing": Metadata(
         default_search_space=(-500.0, 500.0),
@@ -142,7 +155,9 @@ FunctionMetadata: dict[str, Metadata] = {
             "https://arxiv.org/abs/1308.4008",
         ],
         global_optimum=0.0,
-        global_optimum_coordinates=lambda d: [sqrt(i + 1) for i in range(0, d)],
+        global_optimum_coordinates=functools.partial(
+            coordinates_by_index_rule, rule=lambda i: sqrt(i + 1)
+        ),
     ),
     "Rastrigin": Metadata(
         default_search_space=(-5.12, 5.12),
@@ -263,8 +278,8 @@ FunctionMetadata: dict[str, Metadata] = {
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=0.0,
-        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
+        global_optimum=1.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.9),
     ),
     "Weierstrass": Metadata(
         default_search_space=(-0.5, 0.5),
@@ -277,8 +292,10 @@ FunctionMetadata: dict[str, Metadata] = {
     ),
     "Whitley": Metadata(
         default_search_space=(-10.24, 10.24),
+        comments="Implements the [2] reference.",
         references=[
             "https://arxiv.org/abs/1308.4008",
+            "https://infinity77.net/global_optimization/test_functions_nd_W.html",
         ],
         global_optimum=0.0,
         global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
