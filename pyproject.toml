@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "py_benchmark_functions"
-authors = ["Moésio Filho", "Gabriel Barbosa"]
-maintainers = ["Moésio Filho"]
+authors = [{name = "Moésio Filho", email = "moesio.f@gmail.com"}, {name = "Gabriel Barbosa"}]
+maintainers = [{name = "Moésio Filho", email = "moesio.f@gmail.com"}]
 license = "MIT"
 version = "0.1.0"
 readme = "README.md"
