@@ -167,5 +167,5 @@ The following table lists the functions officially supported by the library. If 
 >
 > [\[5\]](https://infinity77.net/global_optimization/test_functions_nd_M.html): https://infinity77.net/global_optimization/test_functions_nd_M.html
 >
-> _All the images can be generated using the [`Drawer`](py-benchmark-functions/blob/main/py_benchmark_functions/plot/drawer.py) utility._
+> _All the images can be generated using the [`Drawer`](py_benchmark_functions/plot/drawer.py) utility._
 
