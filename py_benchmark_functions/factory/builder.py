@@ -1,6 +1,12 @@
 """Function builder."""
 
-from typing import Self
+try:
+    from typing import Self
+except ImportError:
+    # Self was added on Python 3.11
+    from typing import TypeVar
+
+    Self = TypeVar("Self", bound="Builder")
 
 from py_benchmark_functions import Domain, Function, Transformation
 
