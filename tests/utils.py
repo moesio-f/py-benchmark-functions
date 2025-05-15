@@ -1,9 +1,11 @@
+from typing import Dict, List, Tuple
+
 from py_benchmark_functions import core
 
 
 class EvaluationSamples:
-    x_4d: list[float] = [1.0, 2.0, 3.0, 4.0]
-    fx_4d: dict[str, float] = {
+    x_4d: List[float] = [1.0, 2.0, 3.0, 4.0]
+    fx_4d: Dict[str, float] = {
         "Ackley": 8.43469444443746497,
         "Alpine2": -0.40033344730936005,
         "BentCigar": 29000001.0,
@@ -41,8 +43,8 @@ class EvaluationSamples:
         "Zakharov": 50880.0,
     }
 
-    zeroes_x_4d: list[float] = [0.0, 0.0, 0.0, 0.0]
-    zeroes_fx_4d: dict[str, float] = {
+    zeroes_x_4d: List[float] = [0.0, 0.0, 0.0, 0.0]
+    zeroes_fx_4d: Dict[str, float] = {
         "Ackley": 0.0,
         "Alpine2": 0.0,
         "Bohachevsky": 0.0,
@@ -81,7 +83,7 @@ class EvaluationSamples:
     }
 
     @classmethod
-    def sample_eval(cls, function: core.Function, dims: int) -> tuple[list, float]:
+    def sample_eval(cls, function: core.Function, dims: int) -> Tuple[list, float]:
         name = function.name
         assert dims == 4
         assert name in cls.fx_4d
@@ -89,7 +91,7 @@ class EvaluationSamples:
         return cls.x_4d, cls.fx_4d[name]
 
     @classmethod
-    def sample_at_zeroes(cls, function: core.Function, dims: int) -> tuple[list, float]:
+    def sample_at_zeroes(cls, function: core.Function, dims: int) -> Tuple[list, float]:
         name = function.name
         assert dims == 4
         assert name in cls.fx_4d

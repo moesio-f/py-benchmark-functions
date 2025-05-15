@@ -2,6 +2,8 @@
 transformations on functions.
 """
 
+from typing import List, Union
+
 from .function import Domain, Function, Metadata
 
 
@@ -20,9 +22,9 @@ class Transformation(Function):
         self,
         fn: Function,
         vshift: float = 0.0,
-        hshift: float | list[float] = 0.0,
+        hshift: Union[float, List[float]] = 0.0,
         outer_scale: float = 1.0,
-        inner_scale: float | list[float] = 1.0,
+        inner_scale: Union[float, List[float]] = 1.0,
         has_same_domain: bool = False,
     ):
         # Store parameters
@@ -45,7 +47,7 @@ class Transformation(Function):
         return self._vshift
 
     @property
-    def hshift(self) -> list[float]:
+    def hshift(self) -> List[float]:
         return self._hshift
 
     @property
@@ -53,7 +55,7 @@ class Transformation(Function):
         return self._outer_scale
 
     @property
-    def inner_scale(self) -> list[float]:
+    def inner_scale(self) -> List[float]:
         return self._inner_scale
 
     @property

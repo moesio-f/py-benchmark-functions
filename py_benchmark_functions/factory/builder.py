@@ -1,5 +1,7 @@
 """Function builder."""
 
+from typing import List, Union
+
 try:
     from typing import Self
 except ImportError:
@@ -23,7 +25,7 @@ class Builder:
         self._base_domain = dict()
         self._base_backend = None
         self._base_fn_name = None
-        self._transformations: list[dict] = []
+        self._transformations: List[dict] = []
 
     def function(self, fn_name: str) -> Self:
         """Select the base function to use.
@@ -44,8 +46,8 @@ class Builder:
 
     def domain(
         self,
-        domain_min: float | list[float] = None,
-        domain_max: float | list[float] = None,
+        domain_min: Union[float, List[float]] = None,
+        domain_max: Union[float, List[float]] = None,
         domain: Domain = None,
     ):
         """Set the target domain for this function. If
@@ -111,9 +113,9 @@ class Builder:
     def transform(
         self,
         vshift: float = 0.0,
-        hshift: float | list[float] = 0.0,
+        hshift: Union[float, List[float]] = 0.0,
         outer_scale: float = 1.0,
-        inner_scale: float | list[float] = 1.0,
+        inner_scale: Union[float, List[float]] = 1.0,
         has_same_domain: bool = False,
     ) -> Self:
         """Add a transformation for either the base
@@ -190,7 +192,7 @@ class Builder:
 
         return fn
 
-    def _apply_transformations(self, fn: Function) -> Function | Transformation:
+    def _apply_transformations(self, fn: Function) -> Union[Function, Transformation]:
         # Maybe skip importing if not needed
         if not self._transformations:
             return fn

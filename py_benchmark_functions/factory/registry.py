@@ -3,27 +3,28 @@
 import importlib
 import inspect
 from functools import cached_property
+from typing import Dict, List, Optional, Set, Tuple, Type, Union
 
 from py_benchmark_functions.core import Function, Transformation
 
 
 class FunctionRegistry:
     def __init__(self):
-        self._reg: dict[str, dict[str, type]] = dict()
+        self._reg: Dict[str, Dict[str, type]] = dict()
         self._register_from_module("py_benchmark_functions.imp.numpy", "numpy", "Numpy")
         self._register_from_module(
             "py_benchmark_functions.imp.tensorflow", "tensorflow", "Tensorflow"
         )
 
     @cached_property
-    def backends(self) -> set[str]:
+    def backends(self) -> Set[str]:
         return set(v_ for k, v in self._reg.items() for v_ in v.keys())
 
     @cached_property
-    def functions(self) -> list[str]:
+    def functions(self) -> List[str]:
         return list(sorted(self._reg))
 
-    def get(self, fn: str, backend: str | None = None) -> type[Function]:
+    def get(self, fn: str, backend: Optional[str] = None) -> Type[Function]:
         if backend is None:
             backend = "numpy"
 
@@ -42,14 +43,14 @@ class FunctionRegistry:
 
         return self._reg[fn][backend]
 
-    def __getitem__(self, key: str | tuple[str, str]) -> type[Function]:
+    def __getitem__(self, key: Union[str, Tuple[str, str]]) -> Type[Function]:
         fn, backend = key, None
         if isinstance(key, tuple):
             fn, backend = key
 
         return self.get(fn, backend)
 
-    def __contains__(self, key: str | tuple[str, str]):
+    def __contains__(self, key: Union[str, Tuple[str, str]]):
         fn, backend = key, None
         if isinstance(key, tuple):
             fn, backend = key

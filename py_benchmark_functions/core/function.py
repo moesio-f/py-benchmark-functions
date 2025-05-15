@@ -1,14 +1,14 @@
 """Core classes for implementing new functions."""
 
 import abc
-import typing
+from typing import List, NamedTuple, Union
 
 from .metadata import Metadata
 
 
-class Domain(typing.NamedTuple):
-    min: list[float]
-    max: list[float]
+class Domain(NamedTuple):
+    min: List[float]
+    max: List[float]
 
 
 class Function:
@@ -17,8 +17,8 @@ class Function:
     def __init__(
         self,
         dims: int,
-        domain_min: float | list[float] = None,
-        domain_max: float | list[float] = None,
+        domain_min: Union[float, List[float]] = None,
+        domain_max: Union[float, List[float]] = None,
         domain: Domain = None,
     ):
         has_domain = (domain is not None) or all(

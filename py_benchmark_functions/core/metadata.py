@@ -3,7 +3,7 @@ functions.
 """
 
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, List, Optional, Tuple, Union, Dict
 
 
 @dataclass(frozen=True)
@@ -24,12 +24,12 @@ class Metadata:
             of dimensions as argument.
     """
 
-    default_search_space: tuple[float, float]
-    references: list[str]
+    default_search_space: Tuple[float, float]
+    references: List[str]
     comments: str = ""
-    default_parameters: dict[str, float] | None = None
-    global_optimum: float | Callable[[int], float] | None = None
-    global_optimum_coordinates: Callable[[int], list[float]] | None = None
+    default_parameters: Optional[Dict[str, float]] = None
+    global_optimum: Optional[Union[float, Callable[[int], float]]] = None
+    global_optimum_coordinates: Optional[Callable[[int], List[float]]] = None
 
     def concrete_optimum(self, dims: int) -> float:
         if self.global_optimum is None:
@@ -40,7 +40,7 @@ class Metadata:
 
         return self.global_optimum
 
-    def concrete_optimum_coordinates(self, dims: int) -> list[float]:
+    def concrete_optimum_coordinates(self, dims: int) -> List[float]:
         if self.global_optimum_coordinates is None:
             return
 

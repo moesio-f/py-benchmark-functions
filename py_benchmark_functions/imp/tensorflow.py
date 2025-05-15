@@ -10,6 +10,7 @@ References:
 
 from functools import cached_property
 from math import e, pi
+from typing import List, Tuple, Union
 
 import tensorflow as tf
 
@@ -25,7 +26,7 @@ class _TFMixin:
         grads, _ = self.grads_at(x)
         return grads
 
-    def grads_at(self, x: tf.Tensor) -> tuple[tf.Tensor, tf.Tensor]:
+    def grads_at(self, x: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         # We select again instead of using __call__
         #   to circumvent autograph's caveats of running
         #   Python side effects.
@@ -45,7 +46,7 @@ class _TFMixin:
         self._use_tf = False
 
     @cached_property
-    def _domain_as_tensor(self) -> tuple[tf.Tensor, tf.Tensor]:
+    def _domain_as_tensor(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return tf.constant(self.domain.min), tf.constant(self.domain.max)
 
     def __call__(self, x: tf.Tensor) -> tf.Tensor:
@@ -95,8 +96,8 @@ class TensorflowFunction(_TFMixin, core.Function):
     def __init__(
         self,
         dims: int,
-        domain_min: float | list[float] = None,
-        domain_max: float | list[float] = None,
+        domain_min: Union[float, List[float]] = None,
+        domain_max: Union[float, List[float]] = None,
         domain: core.Domain = None,
         use_tf_function: bool = True,
         dtype=tf.float32,
@@ -122,9 +123,9 @@ class TensorflowTransformation(_TFMixin, core.Transformation):
         self,
         fn: core.Function,
         vshift: float = 0.0,
-        hshift: float | list[float] = 0.0,
+        hshift: Union[float, List[float]] = 0.0,
         outer_scale: float = 1.0,
-        inner_scale: float | list[float] = 1.0,
+        inner_scale: Union[float, List[float]] = 1.0,
         has_same_domain: bool = False,
         use_tf_function: bool = True,
         dtype=tf.float32,
@@ -139,7 +140,7 @@ class TensorflowTransformation(_TFMixin, core.Transformation):
         self._dtype = dtype
 
     @cached_property
-    def _params_as_tensor(self) -> tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
+    def _params_as_tensor(self) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
         return tuple(
             tf.constant(p, dtype=self._dtype)
             for p in [self.vshift, self.hshift, self.outer_scale, self.inner_scale]

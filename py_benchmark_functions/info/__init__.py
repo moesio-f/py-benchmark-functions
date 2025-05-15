@@ -2,20 +2,20 @@
 
 import functools
 from math import pi, sqrt
-from typing import Callable
+from typing import Callable, Dict, List
 
 from py_benchmark_functions import Metadata
 
 
-def repeat_coordinates(n: int, value: float) -> list[float]:
+def repeat_coordinates(n: int, value: float) -> List[float]:
     return [value] * n
 
 
-def coordinates_by_index_rule(n: int, rule: Callable[[int], float]) -> list[float]:
+def coordinates_by_index_rule(n: int, rule: Callable[[int], float]) -> List[float]:
     return [rule(i) for i in range(n)]
 
 
-FunctionMetadata: dict[str, Metadata] = {
+FunctionMetadata: Dict[str, Metadata] = {
     "Ackley": Metadata(
         default_search_space=(-35.0, 35.0),
         references=[
