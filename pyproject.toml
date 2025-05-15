@@ -12,12 +12,12 @@ description = " Python benchmark functions for Optimization with NumPy, TensorFl
 requires-python = ">=3.8"
 keywords = ["optimization", "benchmark", "numpy", "tensorflow", "torch", "benchmark functions", "global optimization"]
 classifiers = ["Development Status :: 4 - Beta", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12"]
-dependencies = ["numpy>=1.21.0,<3"]
+dependencies = ["numpy >= 1.21.0"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-timeout"]
-tensorflow = ["tensorflow>=2.0.0,<3"]
-torch = ["torch>=2.0.0,<3"]
+tensorflow = ["tensorflow >= 2.0.0"]
+torch = ["torch >= 2.0.0"]
 
 [project.urls]
 repository = "https://github.com/moesio-f/py-benchmark-functions"
