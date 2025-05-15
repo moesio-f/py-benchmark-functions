@@ -300,15 +300,7 @@ class DixonPriceTensorflow(TensorflowFunction):
         xold = x[:, :-1]
         dixon_sum = ii * tf.pow(2 * tf.pow(xi, 2) - xold, 2)
         result = tf.pow(x0 - 1, 2) + tf.reduce_sum(dixon_sum, -1)
-        result = tf.squeeze(result)
-
-        # Maybe batch with size 1?
-        result = tf.cond(
-            tf.math.logical_and(tf.size(shape) > 1, shape[0] == 1),
-            true_fn=lambda: tf.expand_dims(result, axis=0),
-            false_fn=lambda: result,
-        )
-
+        result = maybe_batch(tf.squeeze(result), shape)
         return result
 
 
@@ -319,8 +311,7 @@ class ExponentialTensorflow(TensorflowFunction):
 
 class GriewankTensorflow(TensorflowFunction):
     def _fn(self, x: tf.Tensor):
-        orig_shape = tf.shape(x)
-
+        initial_shape = tf.shape(x)
         x = atleast_2d(x)
         shape = tf.shape(x)
         griewank_sum = tf.divide(tf.reduce_sum(tf.math.pow(x, 2), axis=-1), 4000)
@@ -328,15 +319,7 @@ class GriewankTensorflow(TensorflowFunction):
         den = tf.repeat(tf.expand_dims(den, 0), shape[0], axis=0)
         prod = tf.cos(tf.math.divide(x, tf.sqrt(den)))
         prod = tf.reduce_prod(prod, axis=-1)
-        result = tf.squeeze(griewank_sum - prod + 1)
-
-        # Maybe batch with size 1?
-        result = tf.cond(
-            tf.math.logical_and(tf.size(orig_shape) > 1, orig_shape[0] == 1),
-            true_fn=lambda: tf.expand_dims(result, axis=0),
-            false_fn=lambda: result,
-        )
-
+        result = maybe_batch(tf.squeeze(griewank_sum - prod + 1), initial_shape)
         return result
 
 
@@ -355,15 +338,7 @@ class LevyTensorflow(TensorflowFunction):
             tf.math.pow((wi - 1), 2) * (1 + 10 * tf.math.pow(tf.sin(pi * wi + 1), 2)),
             axis=-1,
         )
-        result = tf.squeeze(term1 + levy_sum + term3)
-
-        # Maybe batch with size 1?
-        result = tf.cond(
-            tf.math.logical_and(tf.size(shape) > 1, shape[0] == 1),
-            true_fn=lambda: tf.expand_dims(result, axis=0),
-            false_fn=lambda: result,
-        )
-
+        result = maybe_batch(tf.squeeze(term1 + levy_sum + term3), shape)
         return result
 
 
@@ -402,7 +377,6 @@ class RastriginTensorflow(TensorflowFunction):
 class RosenbrockTensorflow(TensorflowFunction):
     def _fn(self, x: tf.Tensor):
         shape = tf.shape(x)
-
         x = atleast_2d(x)
         xi = x[:, :-1]
         xnext = x[:, 1:]
@@ -410,15 +384,7 @@ class RosenbrockTensorflow(TensorflowFunction):
             100 * tf.math.pow(xnext - tf.math.pow(xi, 2), 2) + tf.math.pow(xi - 1, 2),
             axis=-1,
         )
-        result = tf.squeeze(result)
-
-        # Maybe batch with size 1?
-        result = tf.cond(
-            tf.math.logical_and(tf.size(shape) > 1, shape[0] == 1),
-            true_fn=lambda: tf.expand_dims(result, axis=0),
-            false_fn=lambda: result,
-        )
-
+        result = maybe_batch(tf.squeeze(result), shape)
         return result
 
 
@@ -431,15 +397,7 @@ class RotatedHyperEllipsoidTensorflow(TensorflowFunction):
         matlow = tf.linalg.band_part(mat, -1, 0)
         inner = tf.reduce_sum(matlow**2, -1)
         result = tf.reduce_sum(inner, -1)
-        result = tf.squeeze(result)
-
-        # Maybe batch with size 1?
-        result = tf.cond(
-            tf.math.logical_and(tf.size(shape) > 1, shape[0] == 1),
-            true_fn=lambda: tf.expand_dims(result, axis=0),
-            false_fn=lambda: result,
-        )
-
+        result = maybe_batch(tf.squeeze(result), shape)
         return result
 
 
@@ -456,7 +414,6 @@ class SarganTensorflow(TensorflowFunction):
         inner_sum_axis = tf.size(shape) - 1
         indices = tf.range(start=1, limit=d, dtype=tf.int32)
         has_batch = tf.math.logical_and(inner_sum_axis > 0, shape[0] > 1)
-
         xj = tf.expand_dims(tf.gather(x, indices, axis=-1), axis=-1)
         inner_x = tf.cond(
             has_batch, true_fn=lambda: tf.expand_dims(x, axis=1), false_fn=lambda: x
@@ -546,7 +503,6 @@ class StrechedVSineWaveTensorflow(TensorflowFunction):
         xi_sqrd = tf.pow(tf.gather(x, indices[:-1], axis=-1), 2)
         xi1_sqrd = tf.pow(tf.gather(x, indices[1:], axis=-1), 2)
         sqrd_sum = xi1_sqrd + xi_sqrd
-
         return tf.reduce_sum(
             tf.multiply(
                 tf.pow(sqrd_sum, 0.25),
@@ -560,7 +516,6 @@ class Trigonometric2Tensorflow(TensorflowFunction):
     def _fn(self, x: tf.Tensor):
         xi_squared = tf.pow(tf.subtract(x, 0.9), 2)
         x1_squared = tf.gather(xi_squared, [0], axis=-1)
-
         res_x = (
             tf.multiply(tf.pow(tf.sin(tf.multiply(xi_squared, 7)), 2), 8)
             + tf.multiply(tf.pow(tf.sin(tf.multiply(x1_squared, 14)), 2), 6)
@@ -588,7 +543,6 @@ class WWavyTensorflow(TensorflowFunction):
             use_tf_function=use_tf_function,
             dtype=dtype,
         )
-
         params = self.metadata.default_parameters
         self._k = params["k"] if k is None else k
 
@@ -626,7 +580,6 @@ class WeierstrassTensorflow(TensorflowFunction):
             use_tf_function=use_tf_function,
             dtype=dtype,
         )
-
         params = self.metadata.default_parameters
         self._a = params["a"] if a is None else a
         self._b = params["b"] if a is None else b
@@ -717,4 +670,12 @@ def atleast_2d(tensor: tf.Tensor) -> tf.Tensor:
         tf.less(tf.size(tf.shape(tensor)), 2),
         lambda: tf.expand_dims(tensor, 0),
         lambda: tensor,
+    )
+
+
+def maybe_batch(value: tf.Tensor, shape) -> tf.Tensor:
+    return tf.cond(
+        tf.math.logical_and(tf.size(shape) > 1, shape[0] == 1),
+        true_fn=lambda: tf.expand_dims(value, axis=0),
+        false_fn=lambda: value,
     )

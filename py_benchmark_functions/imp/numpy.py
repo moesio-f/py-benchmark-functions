@@ -184,7 +184,6 @@ class BohachevskyNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
         x0 = np.take(x, 0, axis=-1)
         x1 = np.take(x, 1, axis=-1)
-
         result = (
             np.pow(x0, 2)
             + 2 * np.pow(x1, 2)
@@ -192,7 +191,6 @@ class BohachevskyNumpy(NumpyFunction):
             - 0.4 * np.cos(4 * np.pi * x1)
             + 0.7
         )
-
         return result
 
 
@@ -202,10 +200,8 @@ class BrownNumpy(NumpyFunction):
         indices = np.arange(start=0, stop=d, dtype=np.int32)
         xi = np.take(x, indices[:-1], axis=-1)
         xi1 = np.take(x, indices[1:], axis=-1)
-
         xi_sq = np.pow(xi, 2)
         xi1_sq = np.pow(xi1, 2)
-
         return np.sum(np.pow(xi_sq, xi1_sq + 1) + np.pow(xi1_sq, xi_sq + 1), axis=-1)
 
 
@@ -241,8 +237,7 @@ class Deb3Numpy(NumpyFunction):
 
 class DixonPriceNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        shape = x.shape
-
+        initial_shape = x.shape
         x = np.atleast_2d(x)
         x0 = x[:, 0]
         d = x.shape[-1]
@@ -250,12 +245,9 @@ class DixonPriceNumpy(NumpyFunction):
         xi = x[:, 1:]
         xold = x[:, :-1]
         dixon_sum = ii * (2 * xi**2 - xold) ** 2
-        result = (x0 - 1) ** 2 + np.sum(dixon_sum, axis=-1)
-
-        # Maybe we should squeeze?
-        if len(shape) <= 1 or shape[0] != 1:
-            result = np.squeeze(result)
-
+        result = maybe_squeeze(
+            (x0 - 1) ** 2 + np.sum(dixon_sum, axis=-1), initial_shape
+        )
         return result
 
 
@@ -266,8 +258,7 @@ class ExponentialNumpy(NumpyFunction):
 
 class GriewankNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        shape = x.shape
-
+        initial_shape = x.shape
         x = np.atleast_2d(x)
         griewank_sum = np.sum(x**2, axis=-1) / 4000.0
         den = np.arange(1, x.shape[-1] + 1, dtype=x.dtype)[None].repeat(
@@ -275,35 +266,23 @@ class GriewankNumpy(NumpyFunction):
         )
         prod = np.cos(x / np.sqrt(den))
         prod = np.prod(prod, axis=-1)
-        result = griewank_sum - prod + 1
-
-        # Maybe we should squeeze?
-        if len(shape) <= 1 or shape[0] != 1:
-            result = np.squeeze(result)
-
+        result = maybe_squeeze(griewank_sum - prod + 1, initial_shape)
         return result
 
 
 class LevyNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        shape = x.shape
-
+        initial_shape = x.shape
         x = np.atleast_2d(x)
         pi = np.pi
         d = x.shape[-1] - 1
         w = 1 + (x - 1) / 4
-
         term1 = np.sin(pi * w[:, 0]) ** 2
         wd = w[:, d]
         term3 = (wd - 1) ** 2 * (1 + np.sin(2 * pi * wd) ** 2)
         wi = w[:, 0:d]
         levy_sum = np.sum((wi - 1) ** 2 * (1 + 10 * np.sin(pi * wi + 1) ** 2), axis=-1)
-        result = term1 + levy_sum + term3
-
-        # Maybe we should squeeze?
-        if len(shape) <= 1 or shape[0] != 1:
-            result = np.squeeze(result)
-
+        result = maybe_squeeze(term1 + levy_sum + term3, initial_shape)
         return result
 
 
@@ -335,40 +314,29 @@ class RastriginNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
         d = x.shape[-1]
         result = 10 * d + np.sum(x**2 - 10 * np.cos(x * 2 * np.pi), axis=-1)
-
         return result
 
 
 class RosenbrockNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        shape = x.shape
-
+        initial_shape = x.shape
         x = np.atleast_2d(x)
         xi = x[:, :-1]
         xnext = x[:, 1:]
-        result = np.sum(100 * (xnext - xi**2) ** 2 + (xi - 1) ** 2, axis=-1)
-
-        # Maybe we should squeeze?
-        if len(shape) <= 1 or shape[0] != 1:
-            result = np.squeeze(result)
-
+        result = maybe_squeeze(
+            np.sum(100 * (xnext - xi**2) ** 2 + (xi - 1) ** 2, axis=-1), initial_shape
+        )
         return result
 
 
 class RotatedHyperEllipsoidNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        shape = x.shape
-
+        initial_shape = x.shape
         x = np.atleast_2d(x)
         mat = x[:, None].repeat(x.shape[-1], axis=1)
         matlow = np.tril(mat)
         inner = np.sum(matlow**2, axis=-1)
-        result = np.sum(inner, axis=-1)
-
-        # Maybe we should squeeze?
-        if len(shape) <= 1 or shape[0] != 1:
-            result = np.squeeze(result)
-
+        result = maybe_squeeze(np.sum(inner, axis=-1), initial_shape)
         return result
 
 
@@ -621,3 +589,12 @@ class ZakharovNumpy(NumpyFunction):
         sum2 = np.sum(x * np.arange(start=1, stop=(d + 1), dtype=x.dtype) / 2, axis=-1)
         result = sum1 + sum2**2 + sum2**4
         return result
+
+
+def maybe_squeeze(value: np.ndarray, initial_shape: tuple):
+    # If initial shape wasn't (batch, d) where batch > 1,
+    #   then it should be squeezed to (1,)
+    if len(initial_shape) <= 1 or initial_shape[0] != 1:
+        value = np.squeeze(value)
+
+    return value
