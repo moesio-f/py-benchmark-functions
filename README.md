@@ -119,43 +119,43 @@ print(x, fn(x))
 
 The following table lists the functions officially supported by the library. If you have any suggestion for new functions to add, we encourage you to open an issue or pull request.
 
-| Function | NumPy | TensorFlow | PyTorch | Reference | Plot |
-| --- | --- | --- | --- | --- | --- |
-| Ackley | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008), [\[2\]](https://www.sfu.ca/~ssurjano/optimization.html) | ![](.github/images/plot-2d-Ackley.png) |
-| Alpine 2 | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Alpine2.png) |
-| Bent Cigar | ✔️ | ✔️  | ⌛ | [\[3\]](https://www3.ntu.edu.sg/home/epnsugan/index_files/CEC2021/CEC2021-2.htm) | ![](.github/images/plot-2d-BentCigar.png) |
-| Bohachevsky | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Bohachevsky.png) |
-| Brown | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Brown.png) |
-| Chung Reynolds | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-ChungReynolds.png) |
-| Csendes | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Csendes.png) |
-| Deb 1 | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008), [\[4\]](https://al-roomi.org/benchmarks/unconstrained/n-dimensions/231-deb-s-function-no-01) | ![](.github/images/plot-2d-Deb1.png) |
-| Deb 3 | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Deb3.png) |
-| Dixon & Price | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008), [\[2\]](https://www.sfu.ca/~ssurjano/optimization.html) | ![](.github/images/plot-2d-DixonPrice.png) |
-| Exponential | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Exponential.png) |
-| Griewank | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Griewank.png) |
-| Levy | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Levy.png) |
-| Mishra 2 | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008), [\[5\]](https://infinity77.net/global_optimization/test_functions_nd_M.html) | ![](.github/images/plot-2d-Mishra2.png) |
-| Powell Sum | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-PowellSum.png) |
-| Qing | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Qing.png) |
-| Rastrigin | ✔️ | ✔️  | ⌛ | [\[3\]](https://www3.ntu.edu.sg/home/epnsugan/index_files/CEC2021/CEC2021-2.htm) | ![](.github/images/plot-2d-Rastrigin.png) |
-| Rosenbrock | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Rosenbrock.png) |
-| Rotated Hyper-Ellipsoid | ✔️ | ✔️  | ⌛ | [\[2\]](https://www.sfu.ca/~ssurjano/optimization.html) | ![](.github/images/plot-2d-RotatedHyperEllipsoid.png) |
-| Salomon | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Salomon.png) |
-| Sargan | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Sargan.png) |
-| Sum Squares | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-SumSquares.png) |
-| Schwefel | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Schwefel.png) |
-| Schwefel 1.2 | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Schwefel12.png) |
-| Schwefel 2.22 | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Schwefel222.png) |
-| Schwefel 2.23 | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Schwefel223.png) |
-| Schwefel 2.26 | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Schwefel226.png) |
-| Schumer Steiglitz | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-SchumerSteiglitz.png) |
-| Sphere | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Sphere.png) |
-| Streched V Sine Wave | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-StrechedVSineWave.png) |
-| Trigonometric 2 | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Trigonometric2.png) |
-| Weierstrass | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Weierstrass.png) |
-| Whitley | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008), [\[5\]](https://infinity77.net/global_optimization/test_functions_nd_M.html) | ![](.github/images/plot-2d-Whitley.png) |
-| W Wavy | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-WWavy.png) |
-| Zakharov | ✔️ | ✔️  | ⌛ | [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) | ![](.github/images/plot-2d-Zakharov.png) |
+| Function | NumPy | TensorFlow | PyTorch | Plot |
+| --- | --- | --- | --- | --- |
+| Ackley<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008),[\[2\]](https://www.sfu.ca/~ssurjano/optimization.html)</sup> | ✔️ | ✔️  | ⌛ |  ![](.github/images/plot-2d-Ackley.png) |
+| Alpine 2<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Alpine2.png) |
+| Bent Cigar<sup>[\[3\]](https://www3.ntu.edu.sg/home/epnsugan/index_files/CEC2021/CEC2021-2.htm)</sup> | ✔️ | ✔️ | ⌛ | ![](.github/images/plot-2d-BentCigar.png) |
+| Bohachevsky<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️ | ⌛ | ![](.github/images/plot-2d-Bohachevsky.png) |
+| Brown<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Brown.png) |
+| Chung Reynolds<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-ChungReynolds.png) |
+| Csendes<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Csendes.png) |
+| Deb 1<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008), [\[4\]](https://al-roomi.org/benchmarks/unconstrained/n-dimensions/231-deb-s-function-no-01)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Deb1.png) |
+| Deb 3<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Deb3.png) |
+| Dixon & Price<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008), [\[2\]](https://www.sfu.ca/~ssurjano/optimization.html)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-DixonPrice.png) |
+| Exponential<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Exponential.png) |
+| Griewank<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Griewank.png) |
+| Levy<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Levy.png) |
+| Mishra 2<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008), [\[5\]](https://infinity77.net/global_optimization/test_functions_nd_M.html)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Mishra2.png) |
+| Powell Sum<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️ | ⌛ | ![](.github/images/plot-2d-PowellSum.png) |
+| Qing<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Qing.png) |
+| Rastrigin<sup>[\[3\]](https://www3.ntu.edu.sg/home/epnsugan/index_files/CEC2021/CEC2021-2.htm)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Rastrigin.png) |
+| Rosenbrock<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Rosenbrock.png) |
+| Rotated Hyper-Ellipsoid<sup>[\[2\]](https://www.sfu.ca/~ssurjano/optimization.html)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-RotatedHyperEllipsoid.png) |
+| Salomon<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008) </sup> | ✔️ | ✔️  | ⌛| ![](.github/images/plot-2d-Salomon.png) |
+| Sargan<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Sargan.png) |
+| Sum Squares<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-SumSquares.png) |
+| Schwefel<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Schwefel.png) |
+| Schwefel 1.2<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Schwefel12.png) |
+| Schwefel 2.22<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Schwefel222.png) |
+| Schwefel 2.23<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Schwefel223.png) |
+| Schwefel 2.26<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Schwefel226.png) |
+| Schumer Steiglitz<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-SchumerSteiglitz.png) |
+| Sphere<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Sphere.png) |
+| Streched V Sine Wave<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-StrechedVSineWave.png) |
+| Trigonometric 2<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Trigonometric2.png) |
+| Weierstrass<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008),[\[5\]](https://infinity77.net/global_optimization/test_functions_nd_M.html)</sup> | ✔️ | ✔️ | ⌛ | ![](.github/images/plot-2d-Weierstrass.png) |
+| Whitley<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Whitley.png) |
+| W Wavy<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-WWavy.png) |
+| Zakharov<sup>[\[1\]](https://doi.org/10.48550/ARXIV.1308.4008)</sup> | ✔️ | ✔️  | ⌛ | ![](.github/images/plot-2d-Zakharov.png) |
 
 > [\[1\]](https://doi.org/10.48550/ARXIV.1308.4008): Jamil, M., & Yang, X.-S. (2013). A Literature Survey of Benchmark Functions For Global Optimization Problems. arXiv. https://doi.org/10.48550/ARXIV.1308.4008 
 >
