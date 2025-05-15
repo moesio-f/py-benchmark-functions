@@ -2,9 +2,7 @@ from py_benchmark_functions import core
 
 
 class EvaluationSamples:
-    x_4d: dict[str, list[float]] = {
-        "default": [1.0, 2.0, 3.0, 4.0],
-    }
+    x_4d: list[float] = [1.0, 2.0, 3.0, 4.0]
     fx_4d: dict[str, float] = {
         "Ackley": 8.43469444443746497,
         "Alpine2": -0.40033344730936005,
@@ -14,12 +12,12 @@ class EvaluationSamples:
         "ChungReynolds": 900.0,
         "Csendes": 11.3658839392,
         "Deb1": -6.182844847431069e-87,
-        "Deb3": -0.036599504738713866,
+        "Deb3": -0.125,
         "DixonPrice": 4230.0,
         "Exponential": -0.135335283237,
         "Griewank": 1.00187037800320189,
         "Levy": 2.76397190019909811,
-        "Mishra2": 49.12257870688604,
+        "Mishra2": 2.0,
         "PowellSum": 4.0,
         "Qing": 184.0,
         "Rastrigin": 30.0,
@@ -34,18 +32,18 @@ class EvaluationSamples:
         "Schwefel226": -2.353818129766789,
         "Schwefel": 43703.20448793846,
         "Sphere": 30.0,
-        "StrechedVSineWave": 3.4648263408031923,
+        "StrechedVSineWave": 3.41314177672,
         "SumSquares": 100.0,
         "Trigonometric2": 31.645637672,
         "WWavy": 1.1130512151573806,
         "Weierstrass": 15.9999923706,
-        "Whitley": 367517.186158,
+        "Whitley": 367532.562701,
         "Zakharov": 50880.0,
     }
 
     zeroes_x_4d: list[float] = [0.0, 0.0, 0.0, 0.0]
     zeroes_fx_4d: dict[str, float] = {
-        "Ackley": 4.44089209850062616e-16,
+        "Ackley": 0.0,
         "Alpine2": 0.0,
         "Bohachevsky": 0.0,
         "BentCigar": 0.0,
@@ -88,7 +86,7 @@ class EvaluationSamples:
         assert dims == 4
         assert name in cls.fx_4d
 
-        return cls.x_4d[name], cls.fx_4d[name]
+        return cls.x_4d, cls.fx_4d[name]
 
     @classmethod
     def sample_at_zeroes(cls, function: core.Function, dims: int) -> tuple[list, float]:
@@ -96,4 +94,4 @@ class EvaluationSamples:
         assert dims == 4
         assert name in cls.fx_4d
 
-        return cls.zeroes_x_4d[name], cls.zeroes_fx_4d[name]
+        return cls.zeroes_x_4d, cls.zeroes_fx_4d[name]

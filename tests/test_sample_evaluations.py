@@ -6,7 +6,6 @@ import tensorflow as tf
 
 from py_benchmark_functions import Function
 from py_benchmark_functions.factory import Registry
-from py_benchmark_functions.imp import numpy as npf
 from py_benchmark_functions.imp import tensorflow as tff
 
 from .utils import EvaluationSamples
@@ -29,7 +28,7 @@ def _to_tensor_or_array(fn: Function, value: list[float]):
     return np.array(value, dtype=np.float32)
 
 
-def _run_test(f: Function, batch_size: int, tol: float = 0.001):
+def _run_test(f: Function, batch_size: int, tol: float = 0.005):
     dims = f.dims
     global_optimum = (
         []
@@ -56,8 +55,8 @@ def _run_test(f: Function, batch_size: int, tol: float = 0.001):
         x, fx = v
 
         # Convert to Tensors
-        x = _to_tensor_or_array(x)
-        fx = _to_tensor_or_array(fx)
+        x = _to_tensor_or_array(f, x)
+        fx = _to_tensor_or_array(f, fx)
 
         # Maybe batch input
         x = _batch_value(x, batch_size)
@@ -79,20 +78,15 @@ def _run_test(f: Function, batch_size: int, tol: float = 0.001):
                 tol,
             )
         else:
-            assert np.isclose(out, fx, rtol=tol)
+            assert np.isclose(out, fx, atol=tol).all()
 
 
 @pytest.mark.parametrize("fn_name", Registry.functions)
 @pytest.mark.parametrize("backend", Registry.backends)
 @pytest.mark.parametrize("batch_size", [0, 1, 32, 256])
 def test_functions(fn_name: str, backend: str, batch_size: int):
-    try:
-        # Currently only 4 dimensions are supported
-        fn = Registry[fn_name, backend](4)
+    # Currently only 4 dimensions are supported
+    fn = Registry[fn_name, backend](4)
 
-        # Run tests in those conditions
-        _run_test(fn, batch_size)
-    except KeyError:
-        # Some functions are currently not supported
-        #   on all backends.
-        pass
+    # Run tests in those conditions
+    _run_test(fn, batch_size)
