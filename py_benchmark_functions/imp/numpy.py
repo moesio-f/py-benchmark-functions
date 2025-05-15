@@ -5,6 +5,7 @@ References:
 """
 
 from functools import cached_property
+from typing import List, Tuple, Union
 
 import numpy as np
 from numpy import pi
@@ -21,7 +22,7 @@ class _NPMixin:
         raise NotImplementedError("Gradients for NumPy functions are not supported.")
 
     @cached_property
-    def _domain_as_array(self) -> tuple[np.ndarray, np.ndarray]:
+    def _domain_as_array(self) -> Tuple[np.ndarray, np.ndarray]:
         return np.array(self.domain.min), np.array(self.domain.max)
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
@@ -94,9 +95,9 @@ class NumpyTransformation(_NPMixin, core.Transformation):
         self,
         fn: core.Function,
         vshift: float = 0.0,
-        hshift: float | list[float] = 0.0,
+        hshift: Union[float, List[float]] = 0.0,
         outer_scale: float = 1.0,
-        inner_scale: float | list[float] = 1.0,
+        inner_scale: Union[float, List[float]] = 1.0,
         has_same_domain: bool = False,
         dtype=np.float32,
     ):
@@ -108,7 +109,7 @@ class NumpyTransformation(_NPMixin, core.Transformation):
         self._dtype = dtype
 
     @cached_property
-    def _params_as_array(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    def _params_as_array(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         return tuple(
             np.array(p, dtype=self._dtype)
             for p in [self.vshift, self.hshift, self.outer_scale, self.inner_scale]
@@ -177,7 +178,7 @@ class BentCigarNumpy(NumpyFunction):
         indices = np.arange(start=1, stop=d, dtype=np.int32)
         x0 = np.take(x, [0], axis=-1).squeeze()
         xi = np.take(x, indices, axis=-1)
-        return np.pow(x0, 2) + (np.sum(np.pow(xi, 2), axis=-1) * 1e6)
+        return np.power(x0, 2) + (np.sum(np.power(xi, 2), axis=-1) * 1e6)
 
 
 class BohachevskyNumpy(NumpyFunction):
@@ -185,8 +186,8 @@ class BohachevskyNumpy(NumpyFunction):
         x0 = np.take(x, 0, axis=-1)
         x1 = np.take(x, 1, axis=-1)
         result = (
-            np.pow(x0, 2)
-            + 2 * np.pow(x1, 2)
+            np.power(x0, 2)
+            + 2 * np.power(x1, 2)
             - 0.3 * np.cos(3 * np.pi * x0)
             - 0.4 * np.cos(4 * np.pi * x1)
             + 0.7
@@ -200,14 +201,14 @@ class BrownNumpy(NumpyFunction):
         indices = np.arange(start=0, stop=d, dtype=np.int32)
         xi = np.take(x, indices[:-1], axis=-1)
         xi1 = np.take(x, indices[1:], axis=-1)
-        xi_sq = np.pow(xi, 2)
-        xi1_sq = np.pow(xi1, 2)
-        return np.sum(np.pow(xi_sq, xi1_sq + 1) + np.pow(xi1_sq, xi_sq + 1), axis=-1)
+        xi_sq = np.power(xi, 2)
+        xi1_sq = np.power(xi1, 2)
+        return np.sum(np.power(xi_sq, xi1_sq + 1) + np.power(xi1_sq, xi_sq + 1), axis=-1)
 
 
 class ChungReynoldsNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        return np.pow(np.sum(np.pow(x, 2), axis=-1), 2)
+        return np.power(np.sum(np.power(x, 2), axis=-1), 2)
 
 
 class CsendesNumpy(NumpyFunction):
@@ -215,13 +216,13 @@ class CsendesNumpy(NumpyFunction):
         if np.prod(x) == 0.0:
             return np.sum(x * 0, axis=-1)
 
-        return np.sum((np.pow(x, 6)) * (2 + np.sin(1 / x)), axis=-1)
+        return np.sum((np.power(x, 6)) * (2 + np.sin(1 / x)), axis=-1)
 
 
 class Deb1Numpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
         d = x.shape[-1]
-        return -np.divide(np.sum(np.pow(np.sin(np.multiply(x, 5 * pi)), 6), axis=-1), d)
+        return -np.divide(np.sum(np.power(np.sin(np.multiply(x, 5 * pi)), 6), axis=-1), d)
 
 
 class Deb3Numpy(NumpyFunction):
@@ -229,7 +230,7 @@ class Deb3Numpy(NumpyFunction):
         d = x.shape[-1]
         return -np.divide(
             np.sum(
-                np.pow(np.sin(np.multiply(np.pow(x, 3 / 4) - 0.05, 5 * pi)), 6), axis=-1
+                np.power(np.sin(np.multiply(np.power(x, 3 / 4) - 0.05, 5 * pi)), 6), axis=-1
             ),
             d,
         )
@@ -253,7 +254,7 @@ class DixonPriceNumpy(NumpyFunction):
 
 class ExponentialNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        return -np.exp(np.multiply(np.sum(np.pow(x, 2), axis=-1), -0.5))
+        return -np.exp(np.multiply(np.sum(np.power(x, 2), axis=-1), -0.5))
 
 
 class GriewankNumpy(NumpyFunction):
@@ -293,21 +294,21 @@ class Mishra2Numpy(NumpyFunction):
         xi = np.take(x, indices[:-1], axis=-1)
         xi1 = np.take(x, indices[1:], axis=-1)
         xn = d - np.sum(np.multiply(xi + xi1, 0.5), axis=-1)
-        return np.pow(1 + xn, xn)
+        return np.power(1 + xn, xn)
 
 
 class PowellSumNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
         d = x.shape[-1]
         indices = np.arange(start=1, stop=d + 1, dtype=self._dtype)
-        return np.sum(np.pow(np.abs(x), indices + 1), axis=-1)
+        return np.sum(np.power(np.abs(x), indices + 1), axis=-1)
 
 
 class QingNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
         d = x.shape[-1]
         indices = np.arange(start=1, stop=d + 1, dtype=self._dtype)
-        return np.sum(np.pow(np.pow(x, 2) - indices, 2), axis=-1)
+        return np.sum(np.power(np.power(x, 2) - indices, 2), axis=-1)
 
 
 class RastriginNumpy(NumpyFunction):
@@ -342,7 +343,7 @@ class RotatedHyperEllipsoidNumpy(NumpyFunction):
 
 class SalomonNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        x_sqrt = np.sqrt(np.sum(np.pow(x, 2), axis=-1))
+        x_sqrt = np.sqrt(np.sum(np.power(x, 2), axis=-1))
         return 1 - np.cos(np.multiply(x_sqrt, 2 * pi)) + np.multiply(x_sqrt, 0.1)
 
 
@@ -359,7 +360,7 @@ class SarganNumpy(NumpyFunction):
         return np.sum(
             np.multiply(
                 d,
-                np.pow(x, 2.0)
+                np.power(x, 2.0)
                 + np.multiply(np.sum(inner_x * xj, axis=inner_sum_axis), 0.4),
             ),
             axis=-1,
@@ -377,7 +378,7 @@ class SumSquaresNumpy(NumpyFunction):
 
 class SchumerSteiglitzNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        return np.sum(np.pow(x, 4), axis=-1)
+        return np.sum(np.power(x, 4), axis=-1)
 
 
 class SchwefelNumpy(NumpyFunction):
@@ -402,12 +403,12 @@ class SchwefelNumpy(NumpyFunction):
         self._a = params["a"] if a is None else a
 
     def _fn(self, x: np.ndarray):
-        return np.pow(np.sum(np.pow(x, 2), axis=-1), self._a)
+        return np.power(np.sum(np.power(x, 2), axis=-1), self._a)
 
 
 class Schwefel12Numpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        return np.sum(np.pow(np.cumsum(x, axis=-1), 2), axis=-1)
+        return np.sum(np.power(np.cumsum(x, axis=-1), 2), axis=-1)
 
 
 class Schwefel222Numpy(NumpyFunction):
@@ -418,7 +419,7 @@ class Schwefel222Numpy(NumpyFunction):
 
 class Schwefel223Numpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        return np.sum(np.pow(x, 10), axis=-1)
+        return np.sum(np.power(x, 10), axis=-1)
 
 
 class Schwefel226Numpy(NumpyFunction):
@@ -439,14 +440,14 @@ class StrechedVSineWaveNumpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
         d = x.shape[-1]
         indices = np.arange(start=0, stop=d, dtype=np.int32)
-        xi_sqrd = np.pow(np.take(x, indices[:-1], axis=-1), 2)
-        xi1_sqrd = np.pow(np.take(x, indices[1:], axis=-1), 2)
+        xi_sqrd = np.power(np.take(x, indices[:-1], axis=-1), 2)
+        xi1_sqrd = np.power(np.take(x, indices[1:], axis=-1), 2)
         sqrd_sum = xi1_sqrd + xi_sqrd
 
         return np.sum(
             np.multiply(
-                np.pow(sqrd_sum, 0.25),
-                np.pow(np.sin(np.multiply(np.pow(sqrd_sum, 0.1), 50)), 2) + 0.1,
+                np.power(sqrd_sum, 0.25),
+                np.power(np.sin(np.multiply(np.power(sqrd_sum, 0.1), 50)), 2) + 0.1,
             ),
             axis=-1,
         )
@@ -454,12 +455,12 @@ class StrechedVSineWaveNumpy(NumpyFunction):
 
 class Trigonometric2Numpy(NumpyFunction):
     def _fn(self, x: np.ndarray):
-        xi_squared = np.pow(np.subtract(x, 0.9), 2)
+        xi_squared = np.power(np.subtract(x, 0.9), 2)
         x1_squared = np.take(xi_squared, [0], axis=-1)
 
         res_x = (
-            np.multiply(np.pow(np.sin(np.multiply(xi_squared, 7)), 2), 8)
-            + np.multiply(np.pow(np.sin(np.multiply(x1_squared, 14)), 2), 6)
+            np.multiply(np.power(np.sin(np.multiply(xi_squared, 7)), 2), 8)
+            + np.multiply(np.power(np.sin(np.multiply(x1_squared, 14)), 2), 6)
             + xi_squared
         )
         return 1 + np.sum(res_x, axis=-1)
@@ -491,7 +492,7 @@ class WWavyNumpy(NumpyFunction):
         return 1 - np.divide(
             np.sum(
                 np.multiply(
-                    np.cos(np.multiply(x, self._k)), np.exp(np.divide(-np.pow(x, 2), 2))
+                    np.cos(np.multiply(x, self._k)), np.exp(np.divide(-np.power(x, 2), 2))
                 ),
                 axis=-1,
             ),
@@ -529,8 +530,8 @@ class WeierstrassNumpy(NumpyFunction):
         kindices = np.arange(start=0, stop=self._kmax + 1, dtype=self._dtype)
 
         #  Constants
-        ak = np.pow(self._a, kindices)
-        bk = np.pow(self._b, kindices)
+        ak = np.power(self._a, kindices)
+        bk = np.power(self._b, kindices)
         ak_cos_pi_bk = d * np.sum(np.multiply(ak, np.cos(np.multiply(bk, pi))), axis=-1)
 
         # Inner x
@@ -556,14 +557,14 @@ class WhitleyNumpy(NumpyFunction):
                 xj = np.expand_dims(xj, axis=-1)
 
             # Terms
-            xi_sqrd = np.pow(x, 2)
-            xi_sqrd_minus_xj_all_sqrd = np.pow(np.subtract(xi_sqrd, xj), 2)
-            one_minus_xj_all_sqrd = np.pow(-np.subtract(xj, 1), 2)
+            xi_sqrd = np.power(x, 2)
+            xi_sqrd_minus_xj_all_sqrd = np.power(np.subtract(xi_sqrd, xj), 2)
+            one_minus_xj_all_sqrd = np.power(-np.subtract(xj, 1), 2)
             hundred_composite = np.multiply(xi_sqrd_minus_xj_all_sqrd, 100)
 
             # Terms
             t1 = np.divide(
-                np.pow(
+                np.power(
                     np.add(
                         hundred_composite,
                         one_minus_xj_all_sqrd,

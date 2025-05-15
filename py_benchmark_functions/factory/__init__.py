@@ -1,3 +1,5 @@
+from typing import List, Set
+
 from py_benchmark_functions import Function
 
 from .builder import Builder
@@ -17,13 +19,9 @@ def get_tf_function(fn_name: str, dims: int) -> Function:
     return Builder().function(fn_name).tensorflow().dims(dims).build()
 
 
-def available_backends() -> set[str]:
+def available_backends() -> Set[str]:
     return Registry.backends
 
 
-def available_functions() -> list[str]:
+def available_functions() -> List[str]:
     return Registry.functions
-
-
-# Clear namescope
-del Function

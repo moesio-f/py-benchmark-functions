@@ -1,5 +1,7 @@
 """Function validation tests."""
 
+from typing import List
+
 import numpy as np
 import pytest
 import tensorflow as tf
@@ -21,7 +23,7 @@ def _batch_value(value, batch_size: int):
     return np.repeat(np.expand_dims(value, 0), batch_size, 0)
 
 
-def _to_tensor_or_array(fn: Function, value: list[float]):
+def _to_tensor_or_array(fn: Function, value: List[float]):
     if isinstance(fn, tff.TensorflowFunction):
         return tf.constant(value, dtype=tf.float32)
 
