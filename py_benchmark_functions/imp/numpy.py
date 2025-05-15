@@ -67,7 +67,7 @@ class _NPMixin:
         return result
 
 
-class NumpyFunction(core.Function, _NPMixin):
+class NumpyFunction(_NPMixin, core.Function):
     def __init__(
         self,
         dims: int,
@@ -88,7 +88,7 @@ class NumpyFunction(core.Function, _NPMixin):
         return FunctionMetadata[self.name]
 
 
-class NumpyTransformation(core.Transformation, _NPMixin):
+class NumpyTransformation(_NPMixin, core.Transformation):
     def __init__(
         self,
         fn: core.Function,
@@ -264,7 +264,6 @@ class BohachevskyNumpy(NumpyFunction):
     """Bohachevsky function (f1, 2-D) defined in [1]."""
 
     def __init__(self, dims: int, domain_min=None, domain_max=None, domain=None):
-        assert dims == 2, "Bohachevsky only supports 2d."
         super().__init__(
             dims, domain_min=domain_min, domain_max=domain_max, domain=domain
         )

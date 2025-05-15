@@ -61,7 +61,7 @@ class _TFMixin:
                 shape (1,) or (batch,)
         """
         #  Guarantee dtype
-        x = tf.cast(x, dytpe=self._dtype)
+        x = tf.cast(x, dtype=self._dtype)
 
         # Select whether should be run eagerly or not
         fn = self._tf_function if self._use_tf else self._fn
@@ -91,7 +91,7 @@ class _TFMixin:
         return tf.cast(fn(x), dtype=self._dtype)
 
 
-class TensorflowFunction(core.Function, _TFMixin):
+class TensorflowFunction(_TFMixin, core.Function):
     def __init__(
         self,
         dims: int,
@@ -117,7 +117,7 @@ class TensorflowFunction(core.Function, _TFMixin):
         return FunctionMetadata[self.name]
 
 
-class TensorflowTransformation(core.Transformation, _TFMixin):
+class TensorflowTransformation(_TFMixin, core.Transformation):
     def __init__(
         self,
         fn: core.Function,
@@ -228,9 +228,7 @@ class Alpine2Tensorflow(TensorflowFunction):
 
 
 class BentCigarTensorflow(TensorflowFunction):
-    """BentCigar function defined in [2].
-    Implementation doesn't support batch yet.
-    """
+    """BentCigar function defined in [2]."""
 
     def __init__(
         self,
@@ -251,9 +249,11 @@ class BentCigarTensorflow(TensorflowFunction):
         )
 
     def _fn(self, x: tf.Tensor):
-        return tf.pow(x[0], 2) + tf.multiply(
-            tf.reduce_sum(tf.pow(x[1:], 2), axis=-1), 1e6
-        )
+        d = x.shape[-1]
+        indices = tf.range(start=1, limit=d, dtype=tf.int32)
+        x0 = tf.squeeze(tf.gather(x, [0], axis=-1))
+        xi = tf.gather(x, indices, axis=-1)
+        return tf.pow(x0, 2) + tf.multiply(tf.reduce_sum(tf.pow(xi, 2), axis=-1), 1e6)
 
 
 class BohachevskyTensorflow(TensorflowFunction):
@@ -268,7 +268,6 @@ class BohachevskyTensorflow(TensorflowFunction):
         use_tf_function: bool = True,
         dtype=tf.float32,
     ):
-        assert dims == 2, "Bohachevsky only supports 2 dimensions."
         super().__init__(
             dims,
             domain_min=domain_min,
@@ -279,11 +278,13 @@ class BohachevskyTensorflow(TensorflowFunction):
         )
 
     def _fn(self, x: tf.Tensor):
+        x0 = tf.squeeze(tf.gather(x, [0], axis=-1))
+        x1 = tf.squeeze(tf.gather(x, [1], axis=-1))
         return (
-            tf.pow(x[0], 2)
-            + tf.math.multiply(tf.pow(x[1], 2), 2)
-            - tf.math.multiply(tf.cos(3 * pi * x[0]), 0.3)
-            - tf.math.multiply(tf.cos(4 * pi * x[1]), 0.4)
+            tf.pow(x0, 2)
+            + tf.math.multiply(tf.pow(x1, 2), 2)
+            - tf.math.multiply(tf.cos(3 * pi * x0), 0.3)
+            - tf.math.multiply(tf.cos(4 * pi * x1), 0.4)
             + 0.7
         )
 
@@ -311,8 +312,9 @@ class BrownTensorflow(TensorflowFunction):
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
-        xi = x[: d - 1]  # len = d-1
-        xi1 = x[1:d]  # len = d-1
+        indices = tf.range(start=0, limit=d, dtype=tf.int32)
+        xi = tf.gather(x, indices[:-1], axis=-1)
+        xi1 = tf.gather(x, indices[1:], axis=-1)
 
         xi_sq = tf.pow(xi, 2)
         xi1_sq = tf.pow(xi1, 2)
@@ -587,8 +589,9 @@ class Mishra2Tensorflow(TensorflowFunction):
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
-        xi = x[: d - 1]
-        xi1 = x[1:]
+        indices = tf.range(start=0, limit=d, dtype=tf.int32)
+        xi = tf.gather(x, indices[:-1], axis=-1)
+        xi1 = tf.gather(x, indices[1:], axis=-1)
         xn = d - tf.reduce_sum(tf.multiply(xi + xi1, 0.5), axis=-1)
         return tf.pow(1 + xn, xn)
 
@@ -617,7 +620,7 @@ class PowellSumTensorflow(TensorflowFunction):
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
         indices = tf.range(start=1, limit=d + 1, dtype=self._dtype)
-        return tf.reduce_sum(tf.pow(tf.math.abs(x), indices + 1))
+        return tf.reduce_sum(tf.pow(tf.math.abs(x), indices + 1), axis=-1)
 
 
 class QingTensorflow(TensorflowFunction):
@@ -786,17 +789,24 @@ class SarganTensorflow(TensorflowFunction):
         )
 
     def _fn(self, x: tf.Tensor):
-        d = x.shape[-1]
-        xj = x[1:]
+        shape = tf.shape(x)
+        d = shape[-1]
+        inner_sum_axis = tf.size(shape) - 1
+        indices = tf.range(start=1, limit=d, dtype=tf.int32)
+        has_batch = tf.math.logical_and(inner_sum_axis > 0, shape[0] > 1)
 
-        def fn(acc, xi):
-            return acc + tf.multiply(
-                tf.pow(xi, 2)
-                + tf.multiply(tf.reduce_sum(tf.multiply(xj, xi), axis=-1), 0.4),
-                d,
-            )
-
-        return tf.foldl(fn, x, initializer=tf.cast(0, dtype=self._dtype))
+        xj = tf.expand_dims(tf.gather(x, indices, axis=-1), axis=-1)
+        inner_x = tf.cond(
+            has_batch, true_fn=lambda: tf.expand_dims(x, axis=1), false_fn=lambda: x
+        )
+        return tf.reduce_sum(
+            tf.multiply(
+                tf.cast(d, self._dtype),
+                tf.pow(x, 2.0)
+                + tf.multiply(tf.reduce_sum(inner_x * xj, axis=inner_sum_axis), 0.4),
+            ),
+            axis=-1,
+        )
 
 
 class SumSquaresTensorflow(TensorflowFunction):
@@ -877,15 +887,7 @@ class Schwefel12Tensorflow(TensorflowFunction):
         )
 
     def _fn(self, x: tf.Tensor):
-        d = x.shape[-1]
-        indices = tf.range(start=0, limit=d, dtype=tf.int32)
-
-        def fn(acc, i):
-            gather_indices = tf.range(start=0, limit=i + 1, dtype=tf.int32)
-            x_ = tf.gather(x, gather_indices)
-            return acc + tf.pow(tf.reduce_sum(x_, axis=-1), 2)
-
-        return tf.foldl(fn, indices, initializer=tf.cast(0, dtype=self._dtype))
+        return tf.reduce_sum(tf.pow(tf.math.cumsum(x, axis=-1), 2), axis=-1)
 
 
 class Schwefel222Tensorflow(TensorflowFunction):
@@ -1040,8 +1042,9 @@ class StrechedVSineWaveTensorflow(TensorflowFunction):
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
-        xi_sqrd = tf.pow(x[: d - 1], 2)
-        xi1_sqrd = tf.pow(x[1:], 2)
+        indices = tf.range(start=0, limit=d, dtype=tf.int32)
+        xi_sqrd = tf.pow(tf.gather(x, indices[:-1], axis=-1), 2)
+        xi1_sqrd = tf.pow(tf.gather(x, indices[1:], axis=-1), 2)
         sqrd_sum = xi_sqrd + xi1_sqrd
 
         return tf.reduce_sum(
@@ -1076,10 +1079,11 @@ class Trigonometric2Tensorflow(TensorflowFunction):
 
     def _fn(self, x: tf.Tensor):
         xi_squared = tf.pow(tf.subtract(x, 0.9), 2)
+        x1_squared = tf.gather(xi_squared, [0], axis=-1)
 
         res_x = (
             tf.multiply(tf.pow(tf.sin(tf.multiply(xi_squared, 7)), 2), 8)
-            + tf.multiply(tf.pow(tf.sin(tf.multiply(xi_squared, 14)), 2), 6)
+            + tf.multiply(tf.pow(tf.sin(tf.multiply(x1_squared, 14)), 2), 6)
             + xi_squared
         )
         return 1 + tf.reduce_sum(res_x, axis=-1)
@@ -1116,24 +1120,19 @@ class WeierstrassTensorflow(TensorflowFunction):
 
     def _fn(self, x: tf.Tensor):
         d = x.shape[-1]
-        a = tf.cast(self._a, dtype=self._dtype)
-        b = tf.cast(self._b, dtype=self._dtype)
-
         kindices = tf.range(start=0, limit=self._kmax + 1, dtype=self._dtype)
-        ak = tf.pow(a, kindices)
-        bk = tf.pow(b, kindices)
 
-        ak_bk_sum = d * tf.reduce_sum(
+        #  Constants
+        ak = tf.pow(self._a, kindices)
+        bk = tf.pow(self._b, kindices)
+        ak_cos_pi_bk = d * tf.reduce_sum(
             tf.multiply(ak, tf.cos(tf.multiply(bk, pi))), axis=-1
         )
 
-        def fn(acc, xi):
-            s = tf.reduce_sum(
-                tf.multiply(ak, tf.cos(tf.multiply(2 * pi * bk, xi + 0.5))), axis=-1
-            )
-            return acc + (s - ak_bk_sum)
-
-        return tf.foldl(fn, x, initializer=tf.cast(0, dtype=self._dtype))
+        # Inner x
+        inner_x = tf.expand_dims(tf.add(x, 0.5), axis=-1)
+        ak_cos_2pibk = tf.reduce_sum(ak * tf.cos(2 * pi * bk * inner_x), axis=-1)
+        return tf.reduce_sum(ak_cos_2pibk, axis=-1) - ak_cos_pi_bk
 
 
 class WhitleyTensorflow(TensorflowFunction):
@@ -1158,18 +1157,51 @@ class WhitleyTensorflow(TensorflowFunction):
         )
 
     def _fn(self, x: tf.Tensor):
-        d = x.shape[-1]
+        shape = tf.shape(x)
+        d = shape[-1]
+        has_batch = tf.size(shape) > 1
+        initializer = tf.cond(
+            has_batch,
+            true_fn=lambda: tf.zeros((shape[0],), dtype=self._dtype),
+            false_fn=lambda: tf.cast(0.0, dtype=self._dtype),
+        )
         indices = tf.range(start=0, limit=d, dtype=tf.int32)
 
-        def fn(acc, i):
-            xi_sqrd = tf.pow(tf.gather(x, i), 2)
-            ij_diff_sqrd = tf.pow(tf.subtract(xi_sqrd, x), 2)
-            aux = tf.pow(-tf.subtract(x, 1), 2)
-            t1 = tf.divide(tf.pow(tf.multiply(ij_diff_sqrd, 100) + aux, 2), 4000)
-            t2 = tf.cos(tf.multiply(ij_diff_sqrd, 100) + aux)
+        def fn(acc, j):
+            # xi, xj
+            xi = x
+            xj = tf.gather(x, j, axis=-1)
+            xj = tf.cond(
+                has_batch,
+                true_fn=lambda: tf.expand_dims(xj, axis=-1),
+                false_fn=lambda: xj,
+            )
+
+            # Terms
+            xi_sqrd = tf.pow(xi, 2)
+            xi_sqrd_minus_xj_all_sqrd = tf.pow(tf.subtract(xi_sqrd, xj), 2)
+            one_minus_xj_all_sqrd = tf.pow(-tf.subtract(xj, 1), 2)
+            hundred_composite = tf.multiply(xi_sqrd_minus_xj_all_sqrd, 100)
+
+            # Terms
+            t1 = tf.divide(
+                tf.pow(
+                    tf.add(
+                        hundred_composite,
+                        one_minus_xj_all_sqrd,
+                    ),
+                    2,
+                ),
+                4000,
+            )
+            t2 = tf.cos(
+                tf.add(hundred_composite, one_minus_xj_all_sqrd),
+            )
+
+            # Accumulated value
             return acc + tf.reduce_sum(t1 - t2 + 1, axis=-1)
 
-        return tf.foldl(fn, indices, initializer=tf.cast(0, dtype=self._dtype))
+        return tf.foldl(fn, indices, initializer=initializer)
 
 
 class WWavyTensorflow(TensorflowFunction):

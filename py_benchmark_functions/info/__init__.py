@@ -39,12 +39,12 @@ FunctionMetadata: dict[str, Metadata] = {
     ),
     "Bohachevsky": Metadata(
         default_search_space=(-100.0, 100.0),
-        comments="2D only.",
+        comments="Only first two coordinates have meaning.",
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
         global_optimum=0.0,
-        global_optimum_coordinates=lambda d: [0.0, 0.0],
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Brown": Metadata(
         default_search_space=(-1.0, 4.0),
@@ -96,10 +96,11 @@ FunctionMetadata: dict[str, Metadata] = {
     ),
     "Exponential": Metadata(
         default_search_space=(-1.0, 1.0),
+        comments="The reference shows the wrong global optimum value (1.0 instead of -1.0).",
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=1.0,
+        global_optimum=-1.0,
         global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Griewank": Metadata(
@@ -133,7 +134,7 @@ FunctionMetadata: dict[str, Metadata] = {
             "https://arxiv.org/abs/1308.4008",
         ],
         global_optimum=0.0,
-        global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
     ),
     "Qing": Metadata(
         default_search_space=(-500.0, 500.0),
@@ -263,8 +264,8 @@ FunctionMetadata: dict[str, Metadata] = {
         references=[
             "https://arxiv.org/abs/1308.4008",
         ],
-        global_optimum=0.0,
-        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.0),
+        global_optimum=1.0,
+        global_optimum_coordinates=functools.partial(repeat_coordinates, value=0.9),
     ),
     "Weierstrass": Metadata(
         default_search_space=(-0.5, 0.5),
@@ -277,8 +278,10 @@ FunctionMetadata: dict[str, Metadata] = {
     ),
     "Whitley": Metadata(
         default_search_space=(-10.24, 10.24),
+        comments="Implements the [2] reference.",
         references=[
             "https://arxiv.org/abs/1308.4008",
+            "https://infinity77.net/global_optimization/test_functions_nd_W.html",
         ],
         global_optimum=0.0,
         global_optimum_coordinates=functools.partial(repeat_coordinates, value=1.0),
