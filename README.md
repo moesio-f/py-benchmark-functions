@@ -63,7 +63,7 @@ print(fn.name, fn.domain)
 # Output: Ackley Domain(min=[-35.0, -35.0], max=[35.0, 35.0])
 
 print(fn.metadata)
-Output: Metadata(default_search_space=(-35.0, 35.0), references=['https://arxiv.org/abs/1308.4008', 'https://www.sfu.ca/~ssurjano/optimization.html'], comments='', default_parameters={'a': 20.0, 'b': 0.2, 'c': 6.283185307179586}, global_optimum=0.0, global_optimum_coordinates=<...>)
+# Output: Metadata(default_search_space=(-35.0, 35.0), references=['https://arxiv.org/abs/1308.4008', 'https://www.sfu.ca/~ssurjano/optimization.html'], comments='', default_parameters={'a': 20.0, 'b': 0.2, 'c': 6.283185307179586}, global_optimum=0.0, global_optimum_coordinates=<...>)
 ```
 2. Using the global `get_fn`, `get_np_function` or `get_tf_function` from `py_benchmark_functions`;
 ```python
