@@ -119,8 +119,8 @@ print(x, fn(x))
 
 The following table lists the functions officially supported by the library. If you have any suggestion for new functions to add, we encourage you to open an issue or pull request.
 
-|  |  |  |  |
-| --- | --- | --- | --- |
+|  |  |  | 
+| --- | --- | --- | 
 | <p align='center'><img height='200px' src='.github/images/plot-2d-Ackley.png'/></p><p align='center'>Ackley<sup>\[1\],\[2\]</sup></p> | <p align='center'><img height='200px' src='.github/images/plot-2d-Alpine2.png'/></p><p align='center'>Alpine2<sup>\[1\]</sup></p> | <p align='center'><img height='200px' src='.github/images/plot-2d-BentCigar.png'/></p><p align='center'>BentCigar<sup>\[3\]</sup></p> | <p align='center'><img height='200px' src='.github/images/plot-2d-Bohachevsky.png'/></p><p align='center'>Bohachevsky<sup>\[1\]</sup></p> |
 | <p align='center'><img height='200px' src='.github/images/plot-2d-Brown.png'/></p><p align='center'>Brown<sup>\[1\]</sup></p> | <p align='center'><img height='200px' src='.github/images/plot-2d-ChungReynolds.png'/></p><p align='center'>Chung Reynolds<sup>\[1\]</sup></p> | <p align='center'><img height='200px' src='.github/images/plot-2d-Csendes.png'/></p><p align='center'>Csendes<sup>\[1\]</sup></p> | <p align='center'><img height='200px' src='.github/images/plot-2d-Deb1.png'/></p><p align='center'>Deb1<sup>\[1\],\[4\]</sup></p> | 
 | <p align='center'><img height='200px' src='.github/images/plot-2d-Deb3.png'/></p><p align='center'>Deb 3<sup>\[1\]</sup></p> | <p align='center'><img height='200px' src='.github/images/plot-2d-DixonPrice.png'/></p><p align='center'>Dixon & Price<sup>\[1\],\[2\]</sup></p> | <p align='center'><img height='200px' src='.github/images/plot-2d-Exponential.png'/></p><p align='center'>Exponential<sup>\[1\]</sup></p> | <p align='center'><img height='200px' src='.github/images/plot-2d-Griewank.png'/></p><p align='center'>Griewank<sup>\[1\]</sup></p> | 
