@@ -20,16 +20,16 @@
 
 # Quick Start
 
-## Installation
-
 Start by installing the library using your preferred package manager:
 
 ```bash
 python -m pip install --upgrade pip uv
 python -m uv pip install py_benchmark_functions
 ```
+
+TensorFlow and Torch backend are optional and can be enable with:
+
 ```bash
-# TensorFlow and Torch backend are optional and can be enable with:
 python -m uv pip install py_benchmark_functions[tensorflow]
 python -m uv pip install py_benchmark_functions[torch]
 ```
