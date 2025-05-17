@@ -9,6 +9,20 @@ from py_benchmark_functions.info import FunctionMetadata
 
 
 class _TorchMixin:
+    @property
+    def device(self) -> torch.device:
+        return self._device
+
+    def set_device(self, device: torch.device):
+        """Select the device to be used by the
+        function. Inputs are moved to this device
+        and outputs are on this device.
+
+        Args:
+            device (torch.device): device to use.
+        """
+        self._device = device
+
     def grads(self, x: torch.Tensor) -> torch.Tensor:
         grads, _ = self.grads_at(x)
         return grads

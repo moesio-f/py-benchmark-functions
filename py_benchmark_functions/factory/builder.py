@@ -110,6 +110,17 @@ class Builder:
         self._select_backend("tensorflow")
         return self
 
+    def torch(self) -> Self:
+        """Select torch as the backend. Must
+            have installed the library with torch
+            support (see README).
+
+        Returns:
+            Builder: self.
+        """
+        self._select_backend("torch")
+        return self
+
     def transform(
         self,
         vshift: float = 0.0,
@@ -206,6 +217,10 @@ class Builder:
             from py_benchmark_functions.imp.tensorflow import TensorflowTransformation
 
             target_cls = TensorflowTransformation
+        elif self._base_backend == "torch":
+            from py_benchmark_functions.imp.torch import TorchTransformation
+
+            target_cls = TorchTransformation
 
         # Apply transformations
         for t in self._transformations:
