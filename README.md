@@ -13,9 +13,6 @@
   <a href="#benchmark-functions">Benchmark Functions</a>
 </p>
 
-> [!NOTE]  
-> PyTorch support is underway ([#1](https://github.com/moesio-f/py-benchmark-functions/issues/1))!
-
 [`py-benchamrk-functions`](https://github.com/moesio-f/py-benchmark-functions) is a simple library that provides benchmark functions for global optimization. It exposes implementations in major computing frameworks such as NumPy, TensorFlow and PyTorch. All implementations support `batch`-evaluation of coordinates, allowing for performatic evaluation of candidate solutions in the search space. The main goal of this library is to provide up-to-date implementations of multiple common benchmark functions in the scientific literature.
 
 # Quick Start
