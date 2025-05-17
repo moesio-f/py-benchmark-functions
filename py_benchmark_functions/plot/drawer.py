@@ -1,27 +1,51 @@
+from pathlib import Path
 from typing import Union
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 
-from py_benchmark_functions import core, get_fn
+from py_benchmark_functions import core, get_np_function
 from py_benchmark_functions.imp import numpy as npf
 
 
 class Drawer:
-    def __init__(self, function: Union[core.Function, str], resolution=80):
+    def __init__(self, function: Union[core.Function, str], resolution: int = 80):
+        # Guarantee it is a function
         if isinstance(function, str):
-            function = get_fn(function, 2)
-        self._set_mesh(function, resolution)
+            function = get_np_function(function, 2)
+
+        # If it isn't 2D or not NumPy
+        if function.dims > 2 or not isinstance(function, npf.NumpyFunction):
+            function = get_np_function(function.name, 2)
+
+        # Initialize variables
+        self._fn = function
+        self._resolution = resolution
+        self._cmap = cm.get_cmap("jet")
+        self._fig = None
+        self._ax = None
+        self._mesh = None
+
+        # Set _mesh variable
+        self._set_mesh()
 
     def clear(self):
+        # Clear figure axes
         self._ax.clear()
 
-    def draw_mesh(self, show: bool = False, save: bool = True, **kwargs):
-        self.clear()
-        self._ax.set_xlabel(r"$x_1$", fontsize=8)
-        self._ax.set_ylabel(r"$x_2$", fontsize=8)
-        self._ax.set_zlabel(r"$f(x_1, x_2)$", fontsize=8)
+    def draw_mesh(self, **surface_kwargs):
+        # Maybe create figure
+        if self._fig is None:
+            self._fig: plt.Figure = plt.figure()
+            self._ax = self._fig.add_subplot(projection="3d")
+        else:
+            self.clear()
+
+        # Draw surface
+        self._ax.set_xlabel("$x_1$", fontsize=8)
+        self._ax.set_ylabel("$x_2$", fontsize=8)
+        self._ax.set_zlabel(f"{self._fn.name}$(x_1, x_2)$", fontsize=8)
         self._ax.plot_surface(
             self._mesh[0],
             self._mesh[1],
@@ -31,9 +55,10 @@ class Drawer:
             cmap=self._cmap,
             linewidth=0.0,
             shade=True,
-            **kwargs,
+            **surface_kwargs,
         )
 
+        # Draw contour
         plt.contour(
             self._mesh[0],
             self._mesh[1],
@@ -43,44 +68,37 @@ class Drawer:
             alpha=0.3,
         )
 
-        if save:
-            self._fig.savefig(f"plot-2d-{self._fn.name}")
+    def save(self, directory: str | Path = ""):
+        # Maybe draw mesh
+        if self._fig is None:
+            self.draw_mesh()
 
-        if show:
-            plt.show()
+        if isinstance(directory, str):
+            directory = Path(directory)
 
-    def close_fig(self):
+        directory.mkdir(parents=True, exist_ok=True)
+        self._fig.savefig(directory.joinpath(f"plot-2d-{self._fn.name}"))
+        self.close()
+
+    def show(self):
+        # Maybe draw mesh
+        if self._fig is None:
+            self.draw_mesh()
+
+        plt.show()
+
+    def close(self):
         plt.close(self._fig)
+        self._fig = None
 
-    def _set_mesh(self, function: core.Function, resolution=80):
-        if function.dims > 2:
-            function = get_fn(function.name, 2)
-
-        self._fn = function
-        self._fig: plt.Figure = plt.figure()
-        self._ax = self._fig.add_subplot(projection="3d")
-        self._resolution = resolution
-
-        # creating mesh
+    def _set_mesh(self):
         linspace = np.linspace(
             self._fn.domain.min, self._fn.domain.max, self._resolution
         )
         X, Y = np.meshgrid(linspace, linspace)
-
-        if isinstance(self._fn, npf.NumpyFunction):
-            zs = [np.array([x, y]) for x, y in zip(np.ravel(X), np.ravel(Y))]
-            Z = np.array([self._fn(v) for v in zs]).reshape(X.shape)
-        else:
-            # fn is TF Function
-            import tensorflow as tf
-
-            zs = [
-                tf.constant([x, y])
-                for x, y in zip(
-                    np.ravel(X).astype(np.float32), np.ravel(Y).astype(np.float32)
-                )
-            ]
-            Z = np.array([self._fn(v).numpy() for v in zs]).reshape(X.shape)
-
-        self._cmap = cm.get_cmap("jet")
+        zs = [np.array([x, y]) for x, y in zip(np.ravel(X), np.ravel(Y))]
+        Z = np.array([self._fn(v) for v in zs]).reshape(X.shape)
         self._mesh = (X, Y, Z)
+
+    def __del__(self):
+        self.close()
