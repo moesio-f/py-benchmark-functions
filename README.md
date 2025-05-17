@@ -116,6 +116,8 @@ print(x, fn(x))
 # [0. 0.]] [-9.536743e-07 -9.536743e-07 -9.536743e-07]
 ```
 
+Additionally, for the `torch` and `tensorflow` backends, it is possible to use their `autograd` to differentiate any of the functions. Specifically, they expose the methods `.grads(x) -> Tensor` and `.grads_at(x) -> Tuple[Tensor, Tensor]` which returns the gradients for the input `x` (beware some functions are not continuously differentiable, which might return `NaN`'s values) and optionally (`grads_at`) the value of the function at `x` (in this order).
+
 # Benchmark Functions
 
 The following table lists the functions officially supported by the library. If you have any suggestion for new functions to add, we encourage you to open an issue or pull request.
