@@ -11,10 +11,11 @@ from py_benchmark_functions.core import Function, Transformation
 class FunctionRegistry:
     def __init__(self):
         self._reg: Dict[str, Dict[str, type]] = dict()
-        self._register_from_module("py_benchmark_functions.imp.numpy", "numpy", "Numpy")
-        self._register_from_module(
-            "py_benchmark_functions.imp.tensorflow", "tensorflow", "Tensorflow"
-        )
+
+        for m in ["numpy", "tensorflow", "torch"]:
+            self._register_from_module(
+                f"py_benchmark_functions.imp.{m}", m, m.capitalize()
+            )
 
     @cached_property
     def backends(self) -> Set[str]:
@@ -76,7 +77,7 @@ class FunctionRegistry:
                 obj.__name__.replace(suffix, ""): obj
                 for _, obj in inspect.getmembers(
                     importlib.import_module(module_name),
-                    predicate=self._is_obj_function_class,
+                    predicate=lambda o: self._is_obj_function_class(o, suffix),
                 )
             }
 
@@ -89,16 +90,14 @@ class FunctionRegistry:
         except ImportError:
             pass
 
-    def _is_obj_function_class(self, obj) -> bool:
+    def _is_obj_function_class(self, obj, suffix) -> bool:
         if not inspect.isclass(obj):
             return False
 
         if not (issubclass(obj, Function) and not issubclass(obj, Transformation)):
             return False
 
-        if not (
-            (name := obj.__name__).endswith("Numpy") or name.endswith("Tensorflow")
-        ):
+        if not obj.__name__.endswith(suffix):
             return False
 
         return True

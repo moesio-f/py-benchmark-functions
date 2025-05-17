@@ -5,10 +5,11 @@ from typing import List
 import numpy as np
 import pytest
 import tensorflow as tf
+import torch
 
 from py_benchmark_functions import Function
 from py_benchmark_functions.factory import Registry
-from py_benchmark_functions.imp import tensorflow as tff
+from py_benchmark_functions.imp import tensorflow as tff, torch as torchf
 
 from .utils import EvaluationSamples
 
@@ -20,12 +21,18 @@ def _batch_value(value, batch_size: int):
     if tf.is_tensor(value):
         return tf.repeat(tf.expand_dims(value, 0), batch_size, 0)
 
+    if torch.is_tensor(value):
+        return torch.repeat_interleave(value.unsqueeze(0), batch_size, dim=0)
+
     return np.repeat(np.expand_dims(value, 0), batch_size, 0)
 
 
 def _to_tensor_or_array(fn: Function, value: List[float]):
     if isinstance(fn, tff.TensorflowFunction):
         return tf.constant(value, dtype=tf.float32)
+
+    if isinstance(fn, torchf.TorchFunction):
+        return torch.tensor(value, dtype=torch.float32)
 
     return np.array(value, dtype=np.float32)
 
