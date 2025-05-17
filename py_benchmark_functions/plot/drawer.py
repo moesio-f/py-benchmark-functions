@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Union
 
-import matplotlib.cm as cm
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -22,7 +22,7 @@ class Drawer:
         # Initialize variables
         self._fn = function
         self._resolution = resolution
-        self._cmap = cm.get_cmap("jet")
+        self._cmap = plt.get_cmap("jet")
         self._fig = None
         self._ax = None
         self._mesh = None
@@ -31,13 +31,14 @@ class Drawer:
         self._set_mesh()
 
     def clear(self):
-        # Clear figure axes
-        self._ax.clear()
+        if self._fig is not None:
+            # Clear figure axes
+            self._ax.clear()
 
     def draw_mesh(self, **surface_kwargs):
         # Maybe create figure
         if self._fig is None:
-            self._fig: plt.Figure = plt.figure()
+            self._fig = plt.figure()
             self._ax = self._fig.add_subplot(projection="3d")
         else:
             self.clear()
@@ -90,6 +91,7 @@ class Drawer:
     def close(self):
         plt.close(self._fig)
         self._fig = None
+        self._ax = None
 
     def _set_mesh(self):
         linspace = np.linspace(
