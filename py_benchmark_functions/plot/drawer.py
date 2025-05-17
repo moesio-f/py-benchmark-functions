@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Union
 
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -69,7 +68,7 @@ class Drawer:
             alpha=0.3,
         )
 
-    def save(self, directory: str | Path = ""):
+    def save(self, directory: Union[str, Path] = ""):
         # Maybe draw mesh
         if self._fig is None:
             self.draw_mesh()
