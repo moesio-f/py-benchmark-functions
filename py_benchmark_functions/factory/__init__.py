@@ -19,6 +19,10 @@ def get_tf_function(fn_name: str, dims: int) -> Function:
     return Builder().function(fn_name).tensorflow().dims(dims).build()
 
 
+def get_torch_function(fn_name: str, dims: int) -> Function:
+    return Builder().function(fn_name).torch().dims(dims).build()
+
+
 def available_backends() -> Set[str]:
     return Registry.backends
 
