@@ -1,6 +1,35 @@
 from typing import Dict, List, Tuple
 
-from py_benchmark_functions import core
+import numpy as np
+import tensorflow as tf
+import torch
+
+from py_benchmark_functions import Function, core
+from py_benchmark_functions.imp import tensorflow as tff
+from py_benchmark_functions.imp import torch as torchf
+
+
+def batch_value(value, batch_size: int):
+    if batch_size <= 0:
+        return value
+
+    if tf.is_tensor(value):
+        return tf.repeat(tf.expand_dims(value, 0), batch_size, 0)
+
+    if torch.is_tensor(value):
+        return torch.repeat_interleave(value.unsqueeze(0), batch_size, dim=0)
+
+    return np.repeat(np.expand_dims(value, 0), batch_size, 0)
+
+
+def to_tensor_or_array(fn: Function, value: List[float]):
+    if isinstance(fn, tff.TensorflowFunction):
+        return tf.constant(value, dtype=tf.float32)
+
+    if isinstance(fn, torchf.TorchFunction):
+        return torch.tensor(value, dtype=torch.float32)
+
+    return np.array(value, dtype=np.float32)
 
 
 class EvaluationSamples:

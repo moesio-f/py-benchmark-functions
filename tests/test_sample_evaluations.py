@@ -1,7 +1,5 @@
 """Function validation tests."""
 
-from typing import List
-
 import numpy as np
 import pytest
 import tensorflow as tf
@@ -11,30 +9,7 @@ from py_benchmark_functions import Function
 from py_benchmark_functions.factory import Registry
 from py_benchmark_functions.imp import tensorflow as tff, torch as torchf
 
-from .utils import EvaluationSamples
-
-
-def _batch_value(value, batch_size: int):
-    if batch_size <= 0:
-        return value
-
-    if tf.is_tensor(value):
-        return tf.repeat(tf.expand_dims(value, 0), batch_size, 0)
-
-    if torch.is_tensor(value):
-        return torch.repeat_interleave(value.unsqueeze(0), batch_size, dim=0)
-
-    return np.repeat(np.expand_dims(value, 0), batch_size, 0)
-
-
-def _to_tensor_or_array(fn: Function, value: List[float]):
-    if isinstance(fn, tff.TensorflowFunction):
-        return tf.constant(value, dtype=tf.float32)
-
-    if isinstance(fn, torchf.TorchFunction):
-        return torch.tensor(value, dtype=torch.float32)
-
-    return np.array(value, dtype=np.float32)
+from .utils import EvaluationSamples, batch_value, to_tensor_or_array
 
 
 def _run_test(f: Function, batch_size: int, tol: float = 0.005):
@@ -64,12 +39,12 @@ def _run_test(f: Function, batch_size: int, tol: float = 0.005):
         x, fx = v
 
         # Convert to Tensors
-        x = _to_tensor_or_array(f, x)
-        fx = _to_tensor_or_array(f, fx)
+        x = to_tensor_or_array(f, x)
+        fx = to_tensor_or_array(f, fx)
 
         # Maybe batch input
-        x = _batch_value(x, batch_size)
-        fx = _batch_value(fx, batch_size)
+        x = batch_value(x, batch_size)
+        fx = batch_value(fx, batch_size)
 
         # Run function
         out = f(x)
