@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies and prepare environment
         run: |
           python -m pip install --upgrade pip uv
-          python -m uv pip install -e .[dev,tensorflow]
+          python -m uv pip install -e .[dev,tensorflow,torch]
   
       - name: Run tests with pytest
         run: pytest -x --timeout=300

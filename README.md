@@ -13,9 +13,6 @@
   <a href="#benchmark-functions">Benchmark Functions</a>
 </p>
 
-> [!NOTE]  
-> PyTorch support is underway ([#1](https://github.com/moesio-f/py-benchmark-functions/issues/1))!
-
 [`py-benchamrk-functions`](https://github.com/moesio-f/py-benchmark-functions) is a simple library that provides benchmark functions for global optimization. It exposes implementations in major computing frameworks such as NumPy, TensorFlow and PyTorch. All implementations support `batch`-evaluation of coordinates, allowing for performatic evaluation of candidate solutions in the search space. The main goal of this library is to provide up-to-date implementations of multiple common benchmark functions in the scientific literature.
 
 # Quick Start
@@ -40,10 +37,10 @@ You can check if the library was correctly installed by running the following:
 import py_benchmark_functions as bf
 
 print(bf.available_backends())
-# Output: {'numpy', 'tensorflow'}
+# Output: {'numpy', 'tensorflow', 'torch'}
 
 print(bf.available_functions())
-# Output: ['Ackley', 'Alpine2', 'BentCigar', 'Bohachevsky', 'Brown', 'ChungReynolds', 'Csendes', 'Deb1', 'Deb3', 'DixonPrice', 'Exponential', 'Griewank', 'Levy', 'Mishra2', 'PowellSum', 'Qing', 'Rastrigin', 'Rosenbrock', 'RotatedHyperEllipsoid', 'Salomon', 'Sargan', 'SchumerSteiglitz', 'Schwefel', 'Schwefel12', 'Schwefel222', 'Schwefel223', 'Schwefel226', 'Sphere', 'StrechedVSineWave', 'SumSquares', 'Trigonometric2', 'WWavy', 'Weierstrass', 'Whitley', 'Zakharov']
+# Output: ['Ackley', ..., 'Zakharov']
 ```
 
 ## Instantiating and using Functions
@@ -80,6 +77,10 @@ print(fn1, type(fn1))
 fn2 = bf.get_tf_function("Zakharov", 2)
 print(fn2, type(fn2))
 # Output: Zakharov(domain=Domain(min=[-5.0, -5.0], max=[10.0, 10.0])) <class 'py_benchmark_functions.imp.tensorflow.ZakharovTensorflow'>
+
+fn3 = bf.get_torch_function("Zakharov", 2)
+print(fn3, type(fn3))
+# Output: Zakharov(domain=Domain(min=[-5.0, -5.0], max=[10.0, 10.0])) <class 'py_benchmark_functions.imp.torch.ZakharovTorch'>
 ```
 3. Using the [`Builder`](py_benchmBohachevskyark_functions/factory/builder.py) class;
 ```python

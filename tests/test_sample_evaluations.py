@@ -5,10 +5,11 @@ from typing import List
 import numpy as np
 import pytest
 import tensorflow as tf
+import torch
 
 from py_benchmark_functions import Function
 from py_benchmark_functions.factory import Registry
-from py_benchmark_functions.imp import tensorflow as tff
+from py_benchmark_functions.imp import tensorflow as tff, torch as torchf
 
 from .utils import EvaluationSamples
 
@@ -20,12 +21,18 @@ def _batch_value(value, batch_size: int):
     if tf.is_tensor(value):
         return tf.repeat(tf.expand_dims(value, 0), batch_size, 0)
 
+    if torch.is_tensor(value):
+        return torch.repeat_interleave(value.unsqueeze(0), batch_size, dim=0)
+
     return np.repeat(np.expand_dims(value, 0), batch_size, 0)
 
 
 def _to_tensor_or_array(fn: Function, value: List[float]):
     if isinstance(fn, tff.TensorflowFunction):
         return tf.constant(value, dtype=tf.float32)
+
+    if isinstance(fn, torchf.TorchFunction):
+        return torch.tensor(value, dtype=torch.float32)
 
     return np.array(value, dtype=np.float32)
 
@@ -67,6 +74,10 @@ def _run_test(f: Function, batch_size: int, tol: float = 0.005):
         # Run function
         out = f(x)
 
+        # If torch, might be on GPU
+        if isinstance(f, torchf.TorchFunction):
+            out = out.cpu()
+
         # Shape and dtype assertion
         assert out.shape == fx.shape
         assert out.dtype == fx.dtype
@@ -91,4 +102,14 @@ def test_functions(fn_name: str, backend: str, batch_size: int):
     fn = Registry[fn_name, backend](4)
 
     # Run tests in those conditions
+    _run_test(fn, batch_size)
+
+
+@pytest.mark.parametrize("fn_name", Registry.functions)
+@pytest.mark.parametrize("batch_size", [0, 1, 32, 256])
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Requires CUDA-capable device."
+)
+def test_torch_on_gpu(fn_name: str, batch_size: int):
+    fn = Registry[fn_name, "torch"](4, device=torch.device("cuda:0"))
     _run_test(fn, batch_size)

@@ -6,4 +6,5 @@ from .factory import (
     get_fn,
     get_np_function,
     get_tf_function,
+    get_torch_function,
 )

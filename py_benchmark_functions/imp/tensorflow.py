@@ -1,13 +1,3 @@
-"""TensorFlow's implementation of many functions.
-References:
-  [1] Momin Jamil and Xin-She Yang.
-      A Literature Survey of Benchmark Functions For Global
-        Optimization Problems, 2013. (10.1504/IJMMNO.2013.055204)
-  [2] IEEE CEC 2021 C-2 (https://cec2021.mini.pw.edu.pl/en/program/competitions)
-  [3] IEEE CEC 2021 C-3 (https://cec2021.mini.pw.edu.pl/en/program/competitions)
-  [4] https://www.sfu.ca/~ssurjano/optimization.html
-"""
-
 from functools import cached_property
 from math import e, pi
 from typing import List, Tuple, Union
@@ -47,7 +37,10 @@ class _TFMixin:
 
     @cached_property
     def _domain_as_tensor(self) -> Tuple[tf.Tensor, tf.Tensor]:
-        return tf.constant(self.domain.min), tf.constant(self.domain.max)
+        return tuple(
+            tf.constant(v, dtype=self._dtype)
+            for v in [self.domain.min, self.domain.max]
+        )
 
     def __call__(self, x: tf.Tensor) -> tf.Tensor:
         """Evaluate the Tensorflow function with
@@ -230,12 +223,7 @@ class BohachevskyTensorflow(TensorflowFunction):
         )
 
         # Maybe batch with size 1?
-        shape = tf.shape(x)
-        out = tf.cond(
-            tf.math.logical_and(tf.size(shape) > 1, shape[0] == 1),
-            true_fn=lambda: tf.expand_dims(out, axis=0),
-            false_fn=lambda: out,
-        )
+        out = maybe_batch(out, tf.shape(x))
 
         return out
 
