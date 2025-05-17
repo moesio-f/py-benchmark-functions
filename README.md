@@ -115,8 +115,11 @@ print(x, fn(x))
 # [0. 0.]
 # [0. 0.]] [-9.536743e-07 -9.536743e-07 -9.536743e-07]
 ```
+> [!NOTE]  
+> Additionally, for the `torch` and `tensorflow` backends, it is possible to use their `autograd` to differentiate any of the functions. Specifically, they expose the methods `.grads(x) -> Tensor` and `.grads_at(x) -> Tuple[Tensor, Tensor]` which returns the gradients for the input `x` and, for `grads_at`, the value of the function at `x` (in this order).
 
-Additionally, for the `torch` and `tensorflow` backends, it is possible to use their `autograd` to differentiate any of the functions. Specifically, they expose the methods `.grads(x) -> Tensor` and `.grads_at(x) -> Tuple[Tensor, Tensor]` which returns the gradients for the input `x` (beware some functions are not continuously differentiable, which might return `NaN`'s values) and optionally (`grads_at`) the value of the function at `x` (in this order).
+> [!WARNING]
+> Beware that some functions are not continuously differentiable, which might return `NaN`'s values! For the specifics of how those backends handle such cases one should refer to the respective official documentation (see [A Gentle Introduction to `torch.autograd`](https://docs.pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html) and [Introduction to gradients and automatic differentiation](https://www.tensorflow.org/guide/autodiff)).
 
 # Benchmark Functions
 
