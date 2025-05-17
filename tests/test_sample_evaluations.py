@@ -74,6 +74,10 @@ def _run_test(f: Function, batch_size: int, tol: float = 0.005):
         # Run function
         out = f(x)
 
+        # If torch, might be on GPU
+        if isinstance(f, torchf.TorchFunction):
+            out = out.cpu()
+
         # Shape and dtype assertion
         assert out.shape == fx.shape
         assert out.dtype == fx.dtype
@@ -98,4 +102,14 @@ def test_functions(fn_name: str, backend: str, batch_size: int):
     fn = Registry[fn_name, backend](4)
 
     # Run tests in those conditions
+    _run_test(fn, batch_size)
+
+
+@pytest.mark.parametrize("fn_name", Registry.functions)
+@pytest.mark.parametrize("batch_size", [0, 1, 32, 256])
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Requires CUDA-capable device."
+)
+def test_torch_on_gpu(fn_name: str, batch_size: int):
+    fn = Registry[fn_name, "torch"](4, device=torch.device("cuda:0"))
     _run_test(fn, batch_size)

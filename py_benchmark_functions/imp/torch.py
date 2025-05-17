@@ -161,6 +161,7 @@ class AckleyTorch(TorchFunction):
         domain_max=None,
         domain: core.Domain = None,
         dtype=torch.float32,
+        device=None,
         a: float = None,
         b: float = None,
         c: float = None,
@@ -171,6 +172,7 @@ class AckleyTorch(TorchFunction):
             domain_max=domain_max,
             domain=domain,
             dtype=dtype,
+            device=device,
         )
 
         params = self.metadata.default_parameters
@@ -229,7 +231,7 @@ class BohachevskyTorch(TorchFunction):
 class BrownTorch(TorchFunction):
     def _fn(self, x: torch.Tensor):
         d = x.shape[-1]
-        indices = torch.arange(start=0, end=d, dtype=torch.int64)
+        indices = torch.arange(start=0, end=d, dtype=torch.int64, device=x.device)
         xi = torch.index_select(x, index=indices[:-1], dim=-1)
         xi1 = torch.index_select(x, index=indices[1:], dim=-1)
 
@@ -443,6 +445,7 @@ class SchwefelTorch(TorchFunction):
         domain: core.Domain = None,
         a: float = None,
         dtype=torch.float32,
+        device=None,
     ):
         super().__init__(
             dims,
@@ -450,6 +453,7 @@ class SchwefelTorch(TorchFunction):
             domain_max=domain_max,
             domain=domain,
             dtype=dtype,
+            device=device,
         )
 
         params = self.metadata.default_parameters
@@ -530,6 +534,7 @@ class WWavyTorch(TorchFunction):
         k: float = None,
         domain: core.Domain = None,
         dtype=torch.float32,
+        device=None,
     ):
         super().__init__(
             dims,
@@ -537,6 +542,7 @@ class WWavyTorch(TorchFunction):
             domain_max=domain_max,
             domain=domain,
             dtype=dtype,
+            device=device,
         )
         params = self.metadata.default_parameters
         self._k = params["k"] if k is None else k
@@ -563,6 +569,7 @@ class WeierstrassTorch(TorchFunction):
         domain_max=None,
         domain: core.Domain = None,
         dtype=torch.float32,
+        device=None,
         a: float = None,
         b: float = None,
         kmax: int = None,
@@ -573,6 +580,7 @@ class WeierstrassTorch(TorchFunction):
             domain_max=domain_max,
             domain=domain,
             dtype=dtype,
+            device=device,
         )
         params = self.metadata.default_parameters
         self._a = params["a"] if a is None else a
