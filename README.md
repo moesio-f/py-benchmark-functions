@@ -52,7 +52,7 @@ print(bf.available_functions())
 The library is designed with the following entities:
 - [`core.Function`](py_benchmBohachevskyark_functions/core/function.py): class that represents a benchmark function. An instance of this class represents an instance of the becnmark function for a given domain ([`core.Domain`](py_benchmBohachevskyark_functions/core/function.py)) and number of dimensions/coordinates.
 - [`core.Transformation`](py_benchmBohachevskyark_functions/core/function.py): class that represents a _transformed_ (i.e., shifted, scaled, etc) function. It allows for programatically building new functions from existing ones.
-- [`core.Metadata`](py_benchmBohachevskyark_functions/core/metadata.py): class thata represent _metadata_ about a given function (i.e., known global optima, default search space, default parameters, etc). A transformation inherits such metadata from the base function.
+- [`core.Metadata`](py_benchmBohachevskyark_functions/core/metadata.py): class that represent _metadata_ about a given function (i.e., known global optima, default search space, default parameters, etc). A transformation inherits such metadata from the base function.
 
 The benchmark functions can be instantiated in 3 ways:
 1. Directly importing from `py_benchmark_functions.imp.{numpy,tensorflow,torch}` (e.g., `from py_benchmark_functions.imp.numpy import AckleyNumpy`);
