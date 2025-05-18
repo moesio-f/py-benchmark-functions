@@ -16,6 +16,7 @@
 
 [![Python](https://img.shields.io/pypi/pyversions/py_benchmark_functions.svg)](https://badge.fury.io/py/py_benchmark_functions)
 [![PyPI](https://badge.fury.io/py/py_benchmark_functions.svg)](https://badge.fury.io/py/py_benchmark_functions)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/moesio-f/moesio-f/py-benchmark-functions/blob/main/examples/intro.ipynb)
 
 [`py-benchamrk-functions`](https://github.com/moesio-f/py-benchmark-functions) is a simple library that provides benchmark functions for global optimization. It exposes implementations in major computing frameworks such as NumPy, TensorFlow and PyTorch. All implementations support `batch`-evaluation of coordinates, allowing for performatic evaluation of candidate solutions in the search space. The main goal of this library is to provide up-to-date implementations of multiple common benchmark functions in the scientific literature.
 
