@@ -11,8 +11,7 @@ except ImportError:
     Self = TypeVar("Self", bound="Builder")
 
 from py_benchmark_functions import Domain, Function, Transformation
-
-from .registry import Registry
+from py_benchmark_functions.factory.registry import Registry
 
 
 class Builder:

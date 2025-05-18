@@ -1,9 +1,8 @@
 from typing import List, Set
 
 from py_benchmark_functions import Function
-
-from .builder import Builder
-from .registry import Registry
+from py_benchmark_functions.factory.builder import Builder
+from py_benchmark_functions.factory.registry import Registry
 
 
 # Functional API
