@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "py_benchmark_functions"
 authors = [{name = "Moésio Filho", email = "moesio.f@gmail.com"}, {name = "Gabriel Barbosa"}]
 maintainers = [{name = "Moésio Filho", email = "moesio.f@gmail.com"}]
-version = "0.2.2"
+version = "0.2.3"
 readme = "README.md"
 description = " Python benchmark functions for Optimization with NumPy, TensorFlow and PyTorch support."
 requires-python = ">=3.8"
@@ -21,6 +21,3 @@ torch = ["torch >= 2.0.0"]
 
 [project.urls]
 repository = "https://github.com/moesio-f/py-benchmark-functions"
-
-[tool.setuptools]
-packages = ["py_benchmark_functions"]
