@@ -4,7 +4,7 @@ transformations on functions.
 
 from typing import List, Union
 
-from .function import Domain, Function, Metadata
+from py_benchmark_functions.core.function import Domain, Function, Metadata
 
 
 class Transformation(Function):

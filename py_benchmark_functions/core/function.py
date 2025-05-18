@@ -3,7 +3,7 @@
 import abc
 from typing import List, NamedTuple, Union
 
-from .metadata import Metadata
+from py_benchmark_functions.core.metadata import Metadata
 
 
 class Domain(NamedTuple):

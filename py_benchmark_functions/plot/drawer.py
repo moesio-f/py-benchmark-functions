@@ -4,19 +4,36 @@ from typing import Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from py_benchmark_functions import core, get_np_function
+from py_benchmark_functions import core, factory, get_np_function
 from py_benchmark_functions.imp import numpy as npf
 
 
 class Drawer:
     def __init__(self, function: Union[core.Function, str], resolution: int = 80):
+        """Constructor.
+
+        Args:
+            function (Function, str): either an instance of a function
+                or name of function. Internally, all functions are converted
+                to 2D and with NumPy. The domain is set as the first two values
+                for minimum and maximum (i.e., function.domain.min[:2] and
+                function.domain.max[:2]).
+            resolution (int): controls the fine-grained surface details, used
+                by linspace. For saving, recommended value is >=60, for interactive
+                plotting should be >=20 and <=40. Defaults to 80 for fine-grained
+                surfaces.
+        """
         # Guarantee it is a function
         if isinstance(function, str):
             function = get_np_function(function, 2)
 
         # If it isn't 2D or not NumPy
         if function.dims > 2 or not isinstance(function, npf.NumpyFunction):
-            function = get_np_function(function.name, 2)
+            function = factory.Registry[function.name, "numpy"](
+                dims=2,
+                domain_min=function.domain.min[:2],
+                domain_max=function.domain.max[:2],
+            )
 
         # Initialize variables
         self._fn = function
@@ -86,6 +103,7 @@ class Drawer:
             self.draw_mesh()
 
         plt.show()
+        self.close()
 
     def close(self):
         plt.close(self._fig)
@@ -97,8 +115,8 @@ class Drawer:
             self._fn.domain.min, self._fn.domain.max, self._resolution
         )
         X, Y = np.meshgrid(linspace, linspace)
-        zs = [np.array([x, y]) for x, y in zip(np.ravel(X), np.ravel(Y))]
-        Z = np.array([self._fn(v) for v in zs]).reshape(X.shape)
+        zs = np.array([[x, y] for x, y in zip(np.ravel(X), np.ravel(Y))])
+        Z = self._fn(zs).reshape(X.shape)
         self._mesh = (X, Y, Z)
 
     def __del__(self):

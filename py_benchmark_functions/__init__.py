@@ -1,5 +1,5 @@
-from .core import Domain, Function, Metadata, Transformation
-from .factory import (
+from py_benchmark_functions.core import Domain, Function, Metadata, Transformation
+from py_benchmark_functions.factory import (
     Builder,
     available_backends,
     available_functions,
