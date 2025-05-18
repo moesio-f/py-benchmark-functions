@@ -97,8 +97,8 @@ class Drawer:
             self._fn.domain.min, self._fn.domain.max, self._resolution
         )
         X, Y = np.meshgrid(linspace, linspace)
-        zs = [np.array([x, y]) for x, y in zip(np.ravel(X), np.ravel(Y))]
-        Z = np.array([self._fn(v) for v in zs]).reshape(X.shape)
+        zs = np.array([[x, y] for x, y in zip(np.ravel(X), np.ravel(Y))])
+        Z = self._fn(zs).reshape(X.shape)
         self._mesh = (X, Y, Z)
 
     def __del__(self):
